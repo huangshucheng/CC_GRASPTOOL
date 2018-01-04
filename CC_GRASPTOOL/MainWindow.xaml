@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="demo" Height="350" Width="525">
     <Grid RenderTransformOrigin="0.5,0.5">
-        <Button Content="确定" HorizontalAlignment="Left" Margin="200,200,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
-        <TextBlock HorizontalAlignment="Left" Margin="158,122,0,0" TextWrapping="Wrap" Text="干嘛啊" VerticalAlignment="Top"/>
+        <Button Content="取cookie" HorizontalAlignment="Left" Margin="94,210,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
+        <TextBlock HorizontalAlignment="Left" Margin="123,125,0,0" TextWrapping="Wrap" Text="干嘛啊" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="283,122,0,0" TextWrapping="Wrap" Text="没干嘛" VerticalAlignment="Top"/>
+        <Button Content="用cookie请求" HorizontalAlignment="Left" Margin="298,210,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
     </Grid>
 </Window>

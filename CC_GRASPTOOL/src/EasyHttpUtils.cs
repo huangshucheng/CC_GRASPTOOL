@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CC_GRASPTOOL
 {
@@ -32,37 +33,30 @@ namespace CC_GRASPTOOL
         public static void CopyHttpHeader(HttpWebRequest fromRequest,HttpWebRequest defaultRequest, HttpWebRequest toRequest)
         {
             //设置头部信息
-            if (string.IsNullOrEmpty(fromRequest.Accept)) toRequest.Accept = defaultRequest.Accept;
+            if (string.IsNullOrEmpty(fromRequest.Accept)) 
+                toRequest.Accept = defaultRequest.Accept;
             else
-            {
                 toRequest.Accept = fromRequest.Accept;
-            }
+
             if (string.IsNullOrEmpty(fromRequest.ContentType))
-            {
                 toRequest.ContentType = defaultRequest.ContentType;
-            }
-            else toRequest.ContentType = fromRequest.ContentType;
+            else 
+                toRequest.ContentType = fromRequest.ContentType;
+
             if (string.IsNullOrEmpty(fromRequest.Referer))
-            {
                 toRequest.Referer = defaultRequest.Referer;
-            }
             else
-            {
                 toRequest.Referer = fromRequest.Referer;
-            }
+
             if (string.IsNullOrEmpty(fromRequest.UserAgent))
-            {
                 toRequest.UserAgent = defaultRequest.UserAgent;
-            }else
-            { toRequest.UserAgent = fromRequest.UserAgent;}
-            if (toRequest.AutomaticDecompression != fromRequest.AutomaticDecompression)
-            {
-                toRequest.AutomaticDecompression = fromRequest.AutomaticDecompression;
-            }
             else
-            {
+                toRequest.UserAgent = fromRequest.UserAgent;
+
+            if (toRequest.AutomaticDecompression != fromRequest.AutomaticDecompression)
+                toRequest.AutomaticDecompression = fromRequest.AutomaticDecompression;
+            else
                 toRequest.AutomaticDecompression = defaultRequest.AutomaticDecompression;
-            }
 
             toRequest.ClientCertificates = fromRequest.ClientCertificates;
             toRequest.Connection = fromRequest.Connection;
@@ -74,23 +68,24 @@ namespace CC_GRASPTOOL
             toRequest.IfModifiedSince = fromRequest.IfModifiedSince;
             if (toRequest.KeepAlive != fromRequest.KeepAlive)
                 toRequest.KeepAlive = fromRequest.KeepAlive;
-            else toRequest.KeepAlive = defaultRequest.KeepAlive;
+            else 
+                toRequest.KeepAlive = defaultRequest.KeepAlive;
+
             toRequest.TransferEncoding = fromRequest.TransferEncoding;
             if (toRequest.AllowAutoRedirect != fromRequest.AllowAutoRedirect)
                 toRequest.AllowAutoRedirect = fromRequest.AllowAutoRedirect;
-            else toRequest.AllowAutoRedirect = defaultRequest.AllowAutoRedirect;
+            else 
+                toRequest.AllowAutoRedirect = defaultRequest.AllowAutoRedirect;
 
-            if (toRequest.Timeout != fromRequest.Timeout) toRequest.Timeout = fromRequest.Timeout;
-            else toRequest.Timeout = defaultRequest.Timeout;
+            if (toRequest.Timeout != fromRequest.Timeout) 
+                toRequest.Timeout = fromRequest.Timeout;
+            else 
+                toRequest.Timeout = defaultRequest.Timeout;
 
             if (toRequest.ServicePoint.Expect100Continue != fromRequest.ServicePoint.Expect100Continue)
-            {
                 toRequest.ServicePoint.Expect100Continue = fromRequest.ServicePoint.Expect100Continue;
-            }
             else
-            {
                 toRequest.ServicePoint.Expect100Continue = defaultRequest.ServicePoint.Expect100Continue;
-            }
         }
 
         public static string NameValuesToQueryParamString(List<KeyValue> nameValueCollection)
@@ -209,6 +204,33 @@ namespace CC_GRASPTOOL
                 byte[] trailer = System.Text.Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
                 rs.Write(trailer, 0, trailer.Length);
             }
+        }
+        /// <summary>
+        /// 检测串值是否为合法的网址格式
+        /// </summary>
+        /// <param name="strValue">要检测的String值</param>
+        /// <returns>成功返回true 失败返回false</returns>
+        public static bool CheckIsUrlFormat(string strValue)
+        {
+            return CheckIsFormat(@"(http://)?([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?", strValue);
+        }
+        /// <summary>
+        /// 检测串值是否为合法的格式
+        /// </summary>
+        /// <param name="strRegex">正则表达式</param>
+        /// <param name="strValue">要检测的String值</param>
+        /// <returns>成功返回true 失败返回false</returns>
+        public static bool CheckIsFormat(string strRegex,string strValue)
+        {
+            if(strValue != null && strValue.Trim() != "")
+            {               
+                Regex re = new Regex(strRegex);
+                if (re.IsMatch(strValue))
+                    return true;
+                else
+                    return false;
+            }
+            return false;
         }
     }
 }
