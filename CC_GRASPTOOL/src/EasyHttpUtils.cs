@@ -66,6 +66,7 @@ namespace CC_GRASPTOOL
             toRequest.UseDefaultCredentials = fromRequest.UseDefaultCredentials;
             toRequest.Expect = fromRequest.Expect;
             toRequest.IfModifiedSince = fromRequest.IfModifiedSince;
+
             if (toRequest.KeepAlive != fromRequest.KeepAlive)
                 toRequest.KeepAlive = fromRequest.KeepAlive;
             else 
@@ -91,14 +92,11 @@ namespace CC_GRASPTOOL
         public static string NameValuesToQueryParamString(List<KeyValue> nameValueCollection)
         {
             StringBuilder builder = new StringBuilder();
-
             //string nameValue = nameValueCollection["s"];
-
             if (nameValueCollection == null || nameValueCollection.Count == 0)
             {
                 return string.Empty;
             }
-
             foreach (KeyValue keyValue in nameValueCollection)
             {
                 builder.Append(keyValue.Key).Append('=').Append(keyValue.Value).Append('&');
@@ -136,7 +134,7 @@ namespace CC_GRASPTOOL
                 buffer = new byte[1024];
             }
 
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new BinaryReader(stream,Encoding.UTF8,true))
             {
                 using (FileStream lxFS = new FileStream(filePath, FileMode.Create))
                 {

@@ -10,113 +10,55 @@ using System.Web;
 
 namespace CC_GRASPTOOL
 {
-    /// <summary>
     /// 框架的核心类，自动处理cookie，并封装了很多简单的api
-    /// </summary>
     public partial class EasyHttp
     {
-        private HttpWebRequest  _request;
+        /// HTTP请求方式
+        public enum Method {GET,POST,PUT,DELETE}
+        //log方式
+        public enum EasyHttpLogLevel {None,Header,Body,All}
+        private HttpWebRequest  _request;   
         private HttpWebResponse _response;
-        private readonly List<KeyValue> _keyValues = new List<KeyValue>();  //请求参数
+        private HttpWebRequest  _defaultHeaderRequest;
+        private HttpWebRequest  _tempRequest;
+        private string          _customePostData;
+        private string          _baseUrl;
+        private string          _url;
+        private EasyHttpLogLevel _logLevel          = EasyHttpLogLevel.None;
+        private EasyHttpLogLevel _defaultLogLevel   = EasyHttpLogLevel.None;
+        private Encoding _responseEncoding          = Encoding.UTF8;
+        private bool _isMultpart                    = false;
+        private Encoding _postEncoding              = Encoding.UTF8;
+        private readonly WebHeaderCollection _headers        = new WebHeaderCollection();   //自定义请求头
+        private readonly CookieContainer _cookieContainer    = new CookieContainer();       //cookie 容器
         private readonly WebHeaderCollection _defaultHeaders = new WebHeaderCollection();   //默认请求头
-        private string _baseUrl;
-        private string _url;
-        private Encoding _responseEncoding = Encoding.UTF8;
-        private HttpWebRequest _defaultHeaderRequest;
-        private HttpWebRequest _tempRequest;
-        private string _customePostData;
-        
-        private EasyHttpLogLevel _logLevel = EasyHttpLogLevel.None;
-        private EasyHttpLogLevel _defaultLogLevel = EasyHttpLogLevel.None;
-        /// <summary>
-        /// 代表HTTP的方法
-        /// </summary>
-        public enum Method
-        {
-            /// <summary>
-            /// GET方法
-            /// </summary>
-            GET,
-            /// <summary>
-            /// post方法
-            /// </summary>
-            POST,
-            /// <summary>
-            /// PUT方法
-            /// </summary>
-            PUT,
-            /// <summary>
-            /// Delete方法
-            /// </summary>
-            DELETE
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        public enum EasyHttpLogLevel
-        {
-            /// <summary>
-            /// 无log
-            /// </summary>
-            None,
-            /// <summary>
-            /// write request headers and response headers
-            /// </summary>
-            Header,
-            /// <summary>
-            /// write response Body as string
-            /// </summary>
-            Body,
-            /// <summary>
-            /// write Header,Body
-            /// </summary>
-            All
-        }
-
-        private bool _isMultpart = false;
-        private Encoding _postEncoding = Encoding.UTF8;
+        private readonly List<KeyValue> _keyValues           = new List<KeyValue>();        //请求参数
         public delegate HttpWebResponse InterceptorDelegate(HttpWebRequest request);
         public InterceptorDelegate RequestInterceptor;
-        private readonly WebHeaderCollection _headers = new WebHeaderCollection();  //自定义请求头
-        private readonly CookieContainer _cookieContainer = new CookieContainer();
-
-        /// <summary>
+        private EasyHttp()
+        {
+        }
         /// 以Multpart方式提交参数或文件
-        /// </summary>
-        /// <returns></returns>
         public EasyHttp AsMultiPart()
         {
             _isMultpart = true;
             return this;
         }
-
-        /// <summary>
         /// set LogLell
-        /// </summary>
-        /// <param name="logLevel">logLevl</param>
-        /// <returns></returns>
         public EasyHttp LogLevel(EasyHttpLogLevel logLevel)
         {
             _logLevel = logLevel;
             return this;
         }
 
-        /// <summary>
         /// set default loglevl
-        /// </summary>
-        /// <param name="defaultLogLevel"> default log level</param>
-        /// <returns></returns>
         public EasyHttp DefaultLogLevel(EasyHttpLogLevel defaultLogLevel)
         {
             _logLevel = defaultLogLevel;
             _defaultLogLevel = defaultLogLevel;
             return this;
         }
-
-        /// <summary>
         /// 获取当前网站的cookie
-        /// </summary>
-        /// <returns></returns>
         public Dictionary<string, string> Cookies()
         {
             Dictionary<string,string> dic = new Dictionary<string, string>();
@@ -130,29 +72,18 @@ namespace CC_GRASPTOOL
             }
             return dic;
         }
-        /// <summary>
         /// get CookieContainer
-        /// </summary>
-        /// <returns>AllCookies</returns>
         public CookieContainer CookieContainer()
         {
             return _cookieContainer;
         }
-        /// <summary>
         /// get cookies as CookieHeader by url
-        /// </summary>
-        /// <param name="url">url</param>
-        /// <returns></returns>
         public string CookieHeaderByUrl(string url)
         {
             Uri uri = new Uri(url);
             return _cookieContainer.GetCookieHeader(uri);
         }
-
-        /// <summary>
         /// 获取http Header中cookie的值
-        /// </summary>
-        /// <returns></returns>
         public string CookieHeader()
         {
             string url = string.Empty;
@@ -162,28 +93,14 @@ namespace CC_GRASPTOOL
                 url = _response.ResponseUri.Scheme + "://" + _response.ResponseUri.Host;
             return CookieHeaderByUrl(url);
         }
-
-        private EasyHttp()
-        {
-        }
-
-        /// <summary>
-        /// 添加一个参数
-        /// </summary>
-        /// <param name="key">参数名</param>
-        /// <param name="value">参数值</param>
-        /// <returns></returns>
+        /// 添加一个请求参数
         public EasyHttp Data(string key, string value)
         {
             KeyValue keyValue = new KeyValue(key, value);
             _keyValues.Add(keyValue);
             return this;
         }
-
-        /// <summary>
         /// 获取请求的Cookie行
-        /// </summary>
-        /// <returns></returns>
         public string RequestCookieHeader()
         {
             if (_request == null) return string.Empty;
@@ -195,14 +112,7 @@ namespace CC_GRASPTOOL
             if (_response == null) return string.Empty;
             return _response.Headers["Set-Cookie"];
         }
-
-        /// <summary>
         /// 添加一个multipart内容
-        /// </summary>
-        /// <param name="key">参数名</param>
-        /// <param name="fileName">文件名</param>
-        /// <param name="filePath">文件路径</param>
-        /// <returns></returns>
         public EasyHttp Data(string key, string fileName, string filePath)
         {
             _isMultpart = true;
@@ -213,49 +123,30 @@ namespace CC_GRASPTOOL
             _keyValues.Add(multiPartContent);
             return this;
         }
-
-        /// <summary>
         /// 设置超时时间
-        /// </summary>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
         public EasyHttp TimeOut(int timeout)
         {
             _tempRequest.Timeout = timeout;
             return this;
         }
-
+        /// 设置默认超时时间
         public EasyHttp DefaultTimeOut(int timeout)
         {
             _defaultHeaderRequest.Timeout = timeout;
             return this;
         }
-
-        /// <summary>
         /// 添加一系列参数
-        /// </summary>
-        /// <param name="nameValueCollection"></param>
-        /// <returns></returns>
         public EasyHttp Data(List<KeyValue> keyValues)
         {
             this._keyValues.AddRange(keyValues);
             return this;
         }
-
-        /// <summary>
         /// 重新定义一个网络请求，这个操作将会清空以前设定的参数
-        /// </summary>
-        /// <param name="url">要请求的url</param>
         public EasyHttp NewRequest(string url)
         {
             return NewRequest(new Uri(url));
         }
-
-        /// <summary>
         /// 创建一个新请求,并使用之前请求获取或者手动设置的Cookie，并在请求完后保存cookie
-        /// </summary>
-        /// <param name="uri">url地址</param>
-        /// <returns></returns>
         public EasyHttp NewRequest(Uri uri)
         {
             _url = uri.ToString();
@@ -264,28 +155,20 @@ namespace CC_GRASPTOOL
                 _defaultHeaderRequest = WebRequest.Create(_url) as HttpWebRequest;
                 _defaultHeaderRequest.ServicePoint.Expect100Continue = false;
             }
-            _logLevel = _defaultLogLevel;
             _headers.Clear();
             _keyValues.Clear();
-            _isMultpart = false;
-            _customePostData = null;
             _keyValues.Clear();
-
-            _baseUrl = uri.Scheme+"://"+uri.Host;
-
+            _logLevel        = _defaultLogLevel;
+            _isMultpart      = false;
+            _customePostData = null;
+            _baseUrl         = uri.Scheme+"://"+uri.Host;
             //创建temprequest
-            _request = null;
-            _response = null;
-            _tempRequest = WebRequest.Create(this._url) as HttpWebRequest;
-
+            _request        = null;
+            _response       = null;
+            _tempRequest    = WebRequest.Create(this._url) as HttpWebRequest;
             return this;
         }
-
-        /// <summary>
         /// 通过url开启一个EasyHttp
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
         public static EasyHttp With(string url)
         {
             if (EasyHttpUtils.CheckIsUrlFormat(url)){
@@ -296,43 +179,24 @@ namespace CC_GRASPTOOL
                 return null;
             }
         }
-
-        /// <summary>
         /// 通过url创建一个全新无任何cookie的EasyHttp
-        /// </summary>
-        /// <param name="url">url地址</param>
-        /// <returns>创建的EasyHttp</returns>
         public static EasyHttp With(Uri url)
         {
-            
             EasyHttp http = new EasyHttp();
             http.NewRequest(url);
             return http;
         }
-
-        /// <summary>
         /// 获取请求的原始<see cref="HttpWebRequest"/>对象
-        /// </summary>
-        /// <returns><see cref="HttpWebRequest"/></returns>
         public HttpWebRequest Request()
         {
             return this._request ?? _tempRequest;
         }
-        /// <summary>
         /// 获取请求的原始<see cref="HttpWebResponse"/>对象
-        /// </summary>
-        /// <returns><see cref="HttpWebRequest"/></returns>
         public HttpWebResponse Response()
         {
             return _response;
         }
-
-        /// <summary>
-        /// 添加一个cookie，之后可用添加的cookie请求
-        /// </summary>
-        /// <param name="name">cookie名</param>
-        /// <param name="value">cook值</param>
-        /// <returns></returns>
+        /// 添加一个cookie，之后可用添加的cookie来请求网页
         public EasyHttp Cookie(string name, string value)
         {
             if(string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value)){
@@ -350,13 +214,8 @@ namespace CC_GRASPTOOL
             }
             return this;
         }
-
-        /// <summary>
         /// 设置请求的Cookie，例如:<c>a=avlue;c=cvalue</c>
-        /// </summary>
-        /// <param name="cookieHeader">Cookie,例如:<c>a=avlue;c=cvalue</c></param>
-        /// <returns></returns>
-        public EasyHttp CookieHeader(string cookieHeader)
+        public EasyHttp SetCookieHeader(string cookieHeader)
         {
             if (string.IsNullOrEmpty(cookieHeader)) return this;
             var substr = cookieHeader.Split(';');
@@ -372,39 +231,34 @@ namespace CC_GRASPTOOL
                         var value = cookieKeyValue[1].Trim();
                         var toLowerKey = key.ToLower();
                         if (toLowerKey != "expires" &&
-                            toLowerKey != "path" && toLowerKey != "domain" && toLowerKey != "max-age"
-                            && toLowerKey != "HttpOnly")
+                            toLowerKey != "path" && 
+                            toLowerKey != "domain" && 
+                            toLowerKey != "max-age"&& 
+                            toLowerKey != "HttpOnly")
                         {
                             Cookie(key,value);
+                            Console.WriteLine("cookie:" + key + " : " + value);
                         }
                     }
                 }
             }
             return this;
         }
-        /// <summary>
         /// 碰到302等状态时，是否自动转入新网址
-        /// </summary>
-        /// <param name="allowAutoRedirect"></param>
-        /// <returns></returns>
         public EasyHttp AllowAutoRedirect(bool allowAutoRedirect)
         {
             _tempRequest.AllowAutoRedirect = allowAutoRedirect;
             return this;
         }
+        //
         public EasyHttp DefaultAllowAutoRedirect(bool allowAutoRedirect)
         {
             _defaultHeaderRequest.AllowAutoRedirect = allowAutoRedirect;
             return this;
         }
-        /// <summary>
         /// 根据指定的方法，获取返回内容的stream
-        /// </summary>
-        /// <param name="method">http方法</param>
-        /// <returns></returns>
         public Stream ExecutForStream(Method method)
         {
-
             HttpWebResponse webResponse = Execute(method);
             this._response = webResponse;
             if (webResponse != null){
@@ -412,11 +266,7 @@ namespace CC_GRASPTOOL
             }
             return null;
         }
-
-        /// <summary>
         /// 设定post数据的编码
-        /// </summary>
-        /// <param name="encoding">post编码</param>
         public void PostEncoding(Encoding encoding)
         {
             this._postEncoding = encoding;
@@ -429,8 +279,7 @@ namespace CC_GRASPTOOL
                 if (!WebHeaderCollection.IsRestricted(key))
                 {
                     _request.Headers.Add(key, _defaultHeaders[key]);
-                }
-                else
+                }else
                 {
                     // do some thing, use HttpWebRequest propertiers to add restricted http header.
                 }
@@ -438,24 +287,62 @@ namespace CC_GRASPTOOL
 
             foreach (string key in _headers.AllKeys)
             {
-                Console.WriteLine("请求头： {0} : {1}",key,_headers[key]);
                 if (!WebHeaderCollection.IsRestricted(key))
                 {
+                    Console.WriteLine("请求头： {0} : {1}", key, _headers[key]);
                     _request.Headers.Add(key, _headers[key]);
                     if (_request.Headers.Get(key) != null)
-                    {
                         _request.Headers.Set(key,_headers[key]);
-                    }
-                }
-                else
+                }else
                 {
-                    Console.WriteLine("头受限制-> {0}", key);
-                    //解决方法：
-                    //http://blog.csdn.net/u011127019/article/details/52571317
+                    Console.WriteLine("请求头（受限）： {0} : {1}", key, _headers[key]);
+                   // Console.WriteLine("头受限制-> {0}", key);
+                    setRestrictedHeader(key);
                     // do some thing, use HttpWebRequest propertiers to add restricted http header.
                 }
             }
         }
+        //设置被限制的请求头（add或set没用的情况下）
+        private void setRestrictedHeader(string headerKey)
+        { 
+            if(string.IsNullOrEmpty(headerKey)){
+                return;
+            }
+            if (headerKey.Equals("User-Agent"))
+            {
+                _request.UserAgent = _headers[headerKey];
+            }
+            else if (headerKey.Equals("Host"))
+            {
+                _request.Host = _headers[headerKey];
+            }
+            else if (headerKey.Equals("Accept"))
+            {
+                _request.Accept = _headers[headerKey];
+            }
+            else if (headerKey.Equals("Proxy-Connection"))
+            {
+                //_request.Connection = _headers[headerKey];      //TODO 
+            }
+            else if (headerKey.Equals("Content-Type"))
+            {
+                _request.ContentType = _headers[headerKey];
+            }
+            else if (headerKey.Equals("Content-Length"))
+            {
+                _request.ContentLength = long.Parse(_headers[headerKey]);
+            }
+            else if (headerKey.Equals("Connection"))
+            {
+                //_request.Connection = _headers[headerKey];        //TODO 
+            }
+            else if (headerKey.Equals("Referer"))
+            {
+                _request.Referer = _headers[headerKey];
+            }
+        }
+
+        //
         private void UrlToQuery(string url)
         {
             Uri uri = new Uri(url);
@@ -471,16 +358,11 @@ namespace CC_GRASPTOOL
                 }
                 this._url = url.Remove(url.IndexOf('?'));
             }
-            else this._url = uri.ToString();
-           // _baseUrl = uri.Scheme + uri.Host;       //TODO  error
+            else 
+                this._url = uri.ToString();
             _baseUrl = uri.Scheme + "://" + uri.Host;
         }
-
-        /// <summary>
         /// 根据指定方法执行请求，并返回原始Response
-        /// </summary>
-        /// <param name="method">http方法</param>
-        /// <returns></returns>
         public HttpWebResponse Execute(Method method)
         {
             string url = string.Empty;
@@ -513,7 +395,6 @@ namespace CC_GRASPTOOL
                 Console.WriteLine("POST ------------>");
                 url = _url;
                 _request = _tempRequest;
-                
                 _request.CookieContainer = _cookieContainer;
                 _request.Method = "POST";
                 EasyHttpUtils.CopyHttpHeader(_tempRequest, _defaultHeaderRequest, _request);
@@ -524,19 +405,23 @@ namespace CC_GRASPTOOL
                 }
                 else
                 {
-                    if(string.IsNullOrEmpty(_request.ContentType))
-                        _request.ContentType = "application/x-www-form-urlencoded";
+                    if (string.IsNullOrEmpty(_request.ContentType))
+                    {
+                        _request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                    }
                     string querystring = EasyHttpUtils.NameValuesToQueryParamString(_keyValues);
-                    Console.WriteLine("请求文本:{0}",querystring);
                     //如果有自定义post内容，则写入自定义post数据，否则写入form
                     if (_customePostData != null) 
                         querystring = _customePostData;
-                    //写入到post
+
+                    if (!string.IsNullOrEmpty(querystring))
+                        Console.WriteLine("\t请求参数: {0}", querystring);
+                    else
+                        Console.WriteLine("\t无请求参数");
                     using (var stream = _request.GetRequestStream())
                     {
                         byte[] postData = _postEncoding.GetBytes(querystring);
                         stream.Write(postData, 0, postData.Length);
-                        // Request.ContentLength = postData.Length;
                     }
                 }
             }
@@ -572,39 +457,34 @@ namespace CC_GRASPTOOL
             }
 
             //Request.CookieContainer.Add(c);
-            if (RequestInterceptor != null)
-            {
+            if (RequestInterceptor != null){
                 _response = RequestInterceptor.Invoke(_request);
             }
-            else
-            {
+            else{
                 try {
                     _response = _request.GetResponse() as HttpWebResponse;
                 }
-                catch (WebException ex)
-                {
+                catch (WebException ex){
                     Console.WriteLine("请求出错--------->:{0}",ex.ToString());
                     return null;      //TODO 
                 }
             }
-            if(_response != null)
-            {
+
+            if(_response != null){
                 _cookieContainer.Add(_response.Cookies);
             }
-            if (_logLevel!= EasyHttpLogLevel.None)
-            {
-                try
-                {
+            if (_logLevel!= EasyHttpLogLevel.None){
+                try{
                     LogRequet(url,method);
                     LogRespose(url,method);
                 }
-                catch (Exception e)
-                {
+                catch (Exception e){
                     Console.WriteLine("log出错:" + e.StackTrace);
                 }
             }
             return _response;
         }
+        //打印请求参数
         private void LogRequestParams()
         {
             if (_keyValues.Count > 0)
@@ -616,16 +496,18 @@ namespace CC_GRASPTOOL
                 }
             }
         }
+        //打印请求网页和请求头
         private void LogRequet(string url,Method method)
         {
             if(_logLevel== EasyHttpLogLevel.None) return;
+            Console.WriteLine("\n");
             Console.WriteLine("<<<--------请求网页-------->>>");
             Console.WriteLine("requestMethd: {0}, Url: {1}",_request.Method,_request.RequestUri); 
 
             if (_logLevel == EasyHttpLogLevel.Header || _logLevel==EasyHttpLogLevel.All)
             {
                 var webHeaderCollection = _request.Headers;
-                Console.WriteLine("<-----------Request_Headers:----------->");
+                Console.WriteLine("<-----------请求头:----------->");
                 foreach (string key in webHeaderCollection.Keys)
                 {
                     Console.WriteLine("\t {0} : {1}",key,webHeaderCollection[key]);
@@ -634,32 +516,29 @@ namespace CC_GRASPTOOL
 
             if (_logLevel == EasyHttpLogLevel.Body || _logLevel==EasyHttpLogLevel.All)
             {
-                if (method == Method.POST)
-                {
+                if (method == Method.POST){
                     Console.WriteLine("Request_Body:");
-
-                    if (_customePostData != null)
-                    {
+                    if (_customePostData != null){
                         Console.WriteLine("\t _customePostData：" + _customePostData);
                     }
-                    else
-                    {
+                    else{
                         LogRequestParams();
                     }
                 }
-                else
-                {
+                else{
                     LogRequestParams();
                 }
             }
         }
+        //打印返回
         private void LogRespose(string url, Method method)
         {
             if (_logLevel == EasyHttpLogLevel.None) return;
             if (_logLevel == EasyHttpLogLevel.Header||_logLevel==EasyHttpLogLevel.All) {
+                Console.WriteLine("\n");
                 Console.WriteLine("<<<--------返回网页-------->>>");
                 Console.WriteLine("Methd: {0}, Url: {1}, statusCode: {2}",_response.Method,_response.ResponseUri,_response.StatusCode);
-                Console.WriteLine("<-----------Response_Headers:----------->");
+                Console.WriteLine("<-----------返回头:----------->");
                 if (_response == null) return;
                 var webHeaderCollection = _response.Headers;
                 foreach (string key in webHeaderCollection.Keys)
@@ -668,22 +547,13 @@ namespace CC_GRASPTOOL
                 }
             }
         }
-
-        /// <summary>
         /// 手动设置网页编码
-        /// </summary>
-        /// <param name="responseEncoding"></param>
-        /// <returns></returns>
         public EasyHttp ResponseEncoding(Encoding responseEncoding)
         {
             this._responseEncoding = responseEncoding;
             return this;
         }
-
-        /// <summary>
         /// 执行GET请求，获取返回的html
-        /// </summary>
-        /// <returns></returns>
         public string GetForString()
         {
             var stream = ExecutForStream(Method.GET);
@@ -691,6 +561,7 @@ namespace CC_GRASPTOOL
             LogHtml(str);
             return str;
         }
+       //
         private bool IsResponseGzipCompress()
         {
             if (_response!= null && _response.ContentEncoding != null &&
@@ -700,23 +571,14 @@ namespace CC_GRASPTOOL
             }
                 return false;
         }
-
-        /// <summary>
         /// 执行Post请求，获取返回的html
-        /// </summary>
-        /// <returns></returns>
         public string PostForString()
         {
             var str = EasyHttpUtils.ReadAllAsString(ExecutForStream(Method.POST), _responseEncoding);
             LogHtml(str);
             return str;
         }
-
-        /// <summary>
         /// 用指定的post内容执行post请求
-        /// </summary>
-        /// <param name="postData">post的数据</param>
-        /// <returns></returns>
         public string PostForString(string postData)
         {
             _customePostData = postData;
@@ -724,19 +586,15 @@ namespace CC_GRASPTOOL
             LogHtml(str);
             return str;
         }
-
-        /// <summary>
         /// 执行Put请求，获取返回的html
-        /// </summary>
-        /// <returns></returns>
         public string PutForString()
         {
             var str = EasyHttpUtils.ReadAllAsString(ExecutForStream(Method.PUT), _responseEncoding);
             LogHtml(str);
             return str;
         }
-
-        private void LogHtml(string html)
+        //打印html
+        public void LogHtml(string html)
         {
             if (_logLevel == EasyHttpLogLevel.Body || _logLevel==EasyHttpLogLevel.All)
             {
@@ -751,153 +609,89 @@ namespace CC_GRASPTOOL
                 }
             }
         }
-
-        /// <summary>
         /// 执行DELETE请求，获取返回的html
-        /// </summary>
-        /// <returns></returns>
         public string DeleteForString()
         {
             return EasyHttpUtils.ReadAllAsString(ExecutForStream(Method.DELETE), _responseEncoding);
         }
-
-        /// <summary>
         /// 执行Get请求，并把返回内容作为文件保存到指定路径
-        /// </summary>
-        /// <param name="filePath">文件路径.包括文件名</param>
-        /// <returns></returns>
         public void GetForFile(string filePath)
         {
              ExecuteForFile(filePath, Method.GET);
         }
-
-        /// <summary>
         /// 执行Post请求，并把返回内容作为文件保存到指定路径
-        /// </summary>
-        /// <param name="filePath">文件路径.包括文件名</param>
-        /// <returns></returns>
         public void PostForFile(string filePath)
         {
              ExecuteForFile(filePath, Method.POST);
         }
-
-        /// <summary>
         /// 执行Put请求，并把返回内容作为文件保存到指定路径
-        /// </summary>
-        /// <param name="filePath">文件路径.包括文件名</param>
-        /// <returns></returns>
         public void PutForFile(string filePath)
         {
              ExecuteForFile(filePath, Method.PUT);
         }
-
-        /// <summary>
         /// 执行Delete请求，并把返回内容作为文件保存到指定路径
-        /// </summary>
-        /// <param name="filePath">文件路径.包括文件名</param>
-        /// <returns></returns>
         public void DeleteForFile(string filePath)
         {
              ExecuteForFile(filePath, Method.DELETE);
         }
-
-
-        /// <summary>
         /// 以Get方式快速请求，舍弃返回内容
-        /// </summary>
         public void GetForFastRequest()
         {
           ExecuteForFastRequest(Method.GET);
         }
-        /// <summary>
         /// 以Post方法快速请求，舍弃返回内容
-        /// </summary>
         public void PostForFastRequest()
         {
             ExecuteForFastRequest(Method.POST);
         }
-        /// <summary>
         /// 以PUT方式快速请求，舍弃返回内容
-        /// </summary>
         public void PutForFastRequest()
         {
             ExecuteForFastRequest(Method.PUT);
         }
-        /// <summary>
         /// 以Delete方式快速请求，舍弃返回内容
-        /// </summary>
         public void DeleteForFastRequest()
         {
             ExecuteForFastRequest(Method.DELETE);
         }
-        /// <summary>
         ///以指定的Http Methond 执行快速请求，舍弃返回内容
-        /// </summary>
-        /// <param name="method">如<code>GET,POST,PUT,DELETE</code>等</param>
         public void ExecuteForFastRequest(Method method)
         {
             var webResponse = Execute(method);
             _response = webResponse;
         }
-
-        /// <summary>
         /// 执行指定方法的请求，将返回内容保存在指定路径的文件中
-        /// </summary>
-        /// <param name="filePath">包含文件名的路径</param>
-        /// <param name="method">http Method</param>
-        /// <returns></returns>
         public long ExecuteForFile(string filePath, Method method)
         {
             var stream = ExecutForStream(method);
             long total = _response.ContentLength;
             return EasyHttpUtils.ReadAllAsFile(stream, total, filePath);
         }
-        
-        /// <summary>
         /// 根据指定的方法执行请求，并把返回内容序列化为Image对象
-        /// </summary>
-        /// <param name="method">指定方法，GET,POST,PUT,DELETE</param>
-        /// <returns></returns>
         public Image ExecuteForImage(Method method)
         {
-
             Stream stream = ExecutForStream(method);
             return Image.FromStream(stream);
         }
-        /// <summary>
         /// 执行Get方法，并把返回内容序列化为Image对象
-        /// </summary>
-        /// <returns></returns>
         public Image GetForImage()
         {
             return ExecuteForImage(Method.GET);
         }
-
-        /// <summary>
         /// 执行Post方法，并把返回内容序列化为Image对象
-        /// </summary>
-        /// <returns></returns>
         public Image PostForImage()
         {
             return ExecuteForImage(Method.POST);
         }
-        /// <summary>
         /// 执行Put方法，并把返回内容序列化为Image对象
-        /// </summary>
-        /// <returns></returns>
         public Image PutForImage()
         {
             return ExecuteForImage(Method.PUT);
         }
-
-        /// <summary>
         /// 执行Delete方法，并把返回内容序列化为Image对象
-        /// </summary>
-        /// <returns></returns>
         public Image DeleteForImage()
         {
             return ExecuteForImage(Method.DELETE);
         }
-        
     }
 }

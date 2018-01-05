@@ -14,7 +14,6 @@ namespace CC_GRASPTOOL
     public partial class App : Application
     {
         public App() {
-            Console.WriteLine("Application。。。。。。");
         }
     }
 }

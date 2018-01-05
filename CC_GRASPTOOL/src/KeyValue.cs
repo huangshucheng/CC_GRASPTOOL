@@ -10,7 +10,6 @@ namespace CC_GRASPTOOL
         public string Value;
         public string FilePath;
         public string ContentType = "*/*";
-
         public KeyValue(string key, string value, string filePath, string contentType)
         {
             Key = key;
@@ -19,14 +18,12 @@ namespace CC_GRASPTOOL
             ContentType = contentType;
         }
         public KeyValue() { }
-
         public KeyValue(string key, string value, string filePath)
         {
             Key = key;
             Value = value;
             FilePath = filePath;
         }
-
         public KeyValue(string key, string value)
         {
             Key = key;
