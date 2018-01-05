@@ -17,6 +17,8 @@ namespace CC_GRASPTOOL
         public enum Method {GET,POST,PUT,DELETE}
         //log方式
         public enum EasyHttpLogLevel {None,Header,Body,All}
+        //body格式
+        public enum BodyType {RAW,HTML,JSON,XML}
         private HttpWebRequest  _request;   
         private HttpWebResponse _response;
         private HttpWebRequest  _defaultHeaderRequest;
@@ -27,6 +29,7 @@ namespace CC_GRASPTOOL
         private EasyHttpLogLevel _logLevel          = EasyHttpLogLevel.None;
         private EasyHttpLogLevel _defaultLogLevel   = EasyHttpLogLevel.None;
         private Encoding _responseEncoding          = Encoding.UTF8;
+        //private Encoding _responseEncoding          = Encoding.Unicode;
         private bool _isMultpart                    = false;
         private Encoding _postEncoding              = Encoding.UTF8;
         private readonly WebHeaderCollection _headers        = new WebHeaderCollection();   //自定义请求头
@@ -38,6 +41,27 @@ namespace CC_GRASPTOOL
         private EasyHttp()
         {
         }
+        public string getResponseString(string rstr)
+        {
+            if(_response ==null || string.IsNullOrEmpty(rstr)){
+                return string.Empty;
+            }
+            string contentType = _response.ContentType;
+            Console.WriteLine("返回字符编码格式:" + contentType);
+            if (contentType.IndexOf("application/json") > -1 || contentType.IndexOf("text/json") > -1)
+            {
+                return EasyHttpUtils.toJson(rstr);
+            }
+            else if (contentType.IndexOf("application/xml") > -1 || contentType.IndexOf("text/xml") > -1)
+            {
+                return EasyHttpUtils.toXml(rstr);
+            }
+            else
+            {
+                return EasyHttpUtils.toHtml(rstr);
+            }
+        }
+
         /// 以Multpart方式提交参数或文件
         public EasyHttp AsMultiPart()
         {
@@ -314,7 +338,7 @@ namespace CC_GRASPTOOL
             }
             else if (headerKey.Equals("Host"))
             {
-                _request.Host = _headers[headerKey];
+                //_request.Host = _headers[headerKey];
             }
             else if (headerKey.Equals("Accept"))
             {
@@ -330,7 +354,7 @@ namespace CC_GRASPTOOL
             }
             else if (headerKey.Equals("Content-Length"))
             {
-                _request.ContentLength = long.Parse(_headers[headerKey]);
+                //_request.ContentLength = long.Parse(_headers[headerKey]);
             }
             else if (headerKey.Equals("Connection"))
             {
@@ -422,6 +446,7 @@ namespace CC_GRASPTOOL
                     {
                         byte[] postData = _postEncoding.GetBytes(querystring);
                         stream.Write(postData, 0, postData.Length);
+                        stream.Close();
                     }
                 }
             }
@@ -463,6 +488,7 @@ namespace CC_GRASPTOOL
             else{
                 try {
                     _response = _request.GetResponse() as HttpWebResponse;
+                   //_response = (await _request.GetResponseAsync()） as HttpWebResponse; //异步读取 TODO
                 }
                 catch (WebException ex){
                     Console.WriteLine("请求出错--------->:{0}",ex.ToString());
@@ -471,7 +497,7 @@ namespace CC_GRASPTOOL
             }
 
             if(_response != null){
-                _cookieContainer.Add(_response.Cookies);
+                _cookieContainer.Add(_response.Cookies);        //添加返回的cookie 到 cookieContainer
             }
             if (_logLevel!= EasyHttpLogLevel.None){
                 try{
@@ -575,6 +601,7 @@ namespace CC_GRASPTOOL
         public string PostForString()
         {
             var str = EasyHttpUtils.ReadAllAsString(ExecutForStream(Method.POST), _responseEncoding);
+            str = getResponseString(str);
             LogHtml(str);
             return str;
         }
@@ -604,6 +631,7 @@ namespace CC_GRASPTOOL
                 }
                 else
                 {
+                    //TODO
                     Console.WriteLine("HTML:");
                     Console.WriteLine(html);
                 }

@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace CC_GRASPTOOL
 {
@@ -106,7 +107,7 @@ namespace CC_GRASPTOOL
                 builder.Remove(builder.Length - 1, 1);
             return builder.ToString();
         }
-
+        
         public static string ReadAllAsString(Stream stream, Encoding encoding)
         {
             if(stream == null || encoding == null){
@@ -230,5 +231,57 @@ namespace CC_GRASPTOOL
             }
             return false;
         }
+        
+      public static string toJson(string content)
+      {
+          if (string.IsNullOrEmpty(content)){
+              return string.Empty;
+          }
+          return content;
+      }
+
+      public static string toXml(string content)
+      {
+          if (string.IsNullOrEmpty(content)){
+              return string.Empty;
+          }
+          try
+          {
+              XmlDocument xd = new XmlDocument();
+              xd.LoadXml(content);
+              StringBuilder sb = new StringBuilder();
+              StringWriter sw = new StringWriter(sb);
+              XmlTextWriter xtw = null;
+              try
+              {
+                  xtw = new XmlTextWriter(sw);
+                  xtw.Formatting = System.Xml.Formatting.Indented;
+                  xtw.Indentation = 4;
+                  xtw.IndentChar = ' ';
+                  xd.WriteTo(xtw);
+              }
+              finally
+              {
+                  if (xtw != null)
+                      xtw.Close();
+              }
+              return sb.ToString();
+          }
+          catch (Exception e)
+          {
+              return e.Message;
+          }
+      }
+
+      public static string toHtml(string content)
+      {
+          if(string.IsNullOrEmpty(content)){
+              return string.Empty;
+          }
+          Regex re = new Regex("(\r*\n[ \t\r\n]*\n){1,}", RegexOptions.Compiled);
+          content = re.Replace(content, "\n");
+          return content;
+      }
+
     }
 }
