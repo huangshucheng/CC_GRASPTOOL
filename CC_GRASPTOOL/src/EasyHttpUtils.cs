@@ -211,7 +211,18 @@ namespace CC_GRASPTOOL
         /// <returns>成功返回true 失败返回false</returns>
         public static bool CheckIsUrlFormat(string strValue)
         {
-            return CheckIsFormat(@"(http://)?([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?", strValue);
+            //return CheckIsFormat(@"(http://)?([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?", strValue);
+            string pattern = @"(http://)?([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?";
+            //string pattern = @"(http|https|ftp)\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&$%\$#\=~])*$";
+            return CheckIsFormat(pattern, strValue);
+        }
+        public static string CheckIsWithHttp(string Value)
+        {
+            if ((Value.Substring(0, 7) != "http://") && (Value.Substring(0, 8) != "https://"))
+            {
+                Value = "http://" + Value;
+            }
+            return Value;
         }
         /// <summary>
         /// 检测串值是否为合法的格式

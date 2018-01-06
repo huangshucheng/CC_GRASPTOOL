@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Web;
+using System.Windows;
 
 namespace CC_GRASPTOOL
 {
@@ -36,11 +37,18 @@ namespace CC_GRASPTOOL
         private readonly CookieContainer _cookieContainer    = new CookieContainer();       //cookie 容器
         private readonly WebHeaderCollection _defaultHeaders = new WebHeaderCollection();   //默认请求头
         private readonly List<KeyValue> _keyValues           = new List<KeyValue>();        //请求参数
+
         public delegate HttpWebResponse InterceptorDelegate(HttpWebRequest request);
         public InterceptorDelegate RequestInterceptor;
+
+        //定义一个delegate委托
+        public delegate void DataReturnHandler(object sender, DataReturn data);
+        public event DataReturnHandler OnDataReturn;
+
         private EasyHttp()
         {
         }
+
         public string getResponseString(string rstr)
         {
             if(_response ==null || string.IsNullOrEmpty(rstr)){
@@ -196,7 +204,16 @@ namespace CC_GRASPTOOL
         public static EasyHttp With(string url)
         {
             if (EasyHttpUtils.CheckIsUrlFormat(url)){
-                return With(new Uri(url));
+                string tu = EasyHttpUtils.CheckIsWithHttp(url);
+                try {
+                    Uri uri = new Uri(tu);
+                    return With(uri);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("url error:{0}",e.Message);
+                    return null;
+                }
             }
             else{
                 Console.WriteLine("error:url is empty or incorrect!");
@@ -241,6 +258,7 @@ namespace CC_GRASPTOOL
         /// 设置请求的Cookie，例如:<c>a=avlue;c=cvalue</c>
         public EasyHttp SetCookieHeader(string cookieHeader)
         {
+            Console.WriteLine("\n请求cookies: ");
             if (string.IsNullOrEmpty(cookieHeader)) return this;
             var substr = cookieHeader.Split(';');
             foreach (string str in substr)
@@ -298,6 +316,7 @@ namespace CC_GRASPTOOL
         //写进请求头，带请求头请求
         private void WriteHeader()
         {
+            Console.WriteLine("\n");
             foreach (string key in _defaultHeaders.AllKeys)
             {
                 if (!WebHeaderCollection.IsRestricted(key))
@@ -439,9 +458,9 @@ namespace CC_GRASPTOOL
                         querystring = _customePostData;
 
                     if (!string.IsNullOrEmpty(querystring))
-                        Console.WriteLine("\t请求参数: {0}", querystring);
+                        Console.WriteLine("\n请求参数: {0}", querystring);
                     else
-                        Console.WriteLine("\t无请求参数");
+                        Console.WriteLine("\n无请求参数");
                     using (var stream = _request.GetRequestStream())
                     {
                         byte[] postData = _postEncoding.GetBytes(querystring);
@@ -480,19 +499,18 @@ namespace CC_GRASPTOOL
                 _request.Method = "DELETE";
                 WriteHeader();
             }
-
-            //Request.CookieContainer.Add(c);
+            //开始请求
             if (RequestInterceptor != null){
                 _response = RequestInterceptor.Invoke(_request);
             }
-            else{
+            else
+            {
                 try {
                     _response = _request.GetResponse() as HttpWebResponse;
-                   //_response = (await _request.GetResponseAsync()） as HttpWebResponse; //异步读取 TODO
                 }
                 catch (WebException ex){
-                    Console.WriteLine("请求出错--------->:{0}",ex.ToString());
-                    return null;      //TODO 
+                    Console.WriteLine("\n请求出错--------->:{0}", ex.Message);
+                    return null; 
                 }
             }
 
@@ -501,29 +519,167 @@ namespace CC_GRASPTOOL
             }
             if (_logLevel!= EasyHttpLogLevel.None){
                 try{
-                    LogRequet(url,method);
-                    LogRespose(url,method);
+                    LogRequet();
+                    LogRespose();
                 }
                 catch (Exception e){
-                    Console.WriteLine("log出错:" + e.StackTrace);
+                    Console.WriteLine("\nlog出错:" + e.Message);
                 }
             }
             return _response;
         }
+        //异步请求
+        public void ExecuteAsyc(Method method)
+        {
+            string url = string.Empty;
+            if (method == Method.GET)
+            {
+                UrlToQuery(_url);
+                url = this._url;
+                Console.WriteLine("url: 1------------>{0}", url);
+                if (_keyValues.Count > 0)
+                    url = url + "?" + EasyHttpUtils.NameValuesToQueryParamString(_keyValues);
+                Console.WriteLine("url: 2------------>{0}", url);
+                _request = WebRequest.Create(url) as HttpWebRequest;
+                EasyHttpUtils.CopyHttpHeader(_tempRequest, _defaultHeaderRequest, _request);
+                _request.Method = "GET";
+                _request.CookieContainer = _cookieContainer;
+                WriteHeader();
+            }
+            else if (method == Method.POST)
+            {
+                url = _url;
+                _request = _tempRequest;
+                _request.CookieContainer = _cookieContainer;
+                _request.Method = "POST";
+                EasyHttpUtils.CopyHttpHeader(_tempRequest, _defaultHeaderRequest, _request);
+                WriteHeader();
+                if (_isMultpart)
+                {
+                    EasyHttpUtils.WriteFileToRequest(_request, _keyValues);
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(_request.ContentType))
+                    {
+                        _request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                    }
+                    string querystring = EasyHttpUtils.NameValuesToQueryParamString(_keyValues);
+                    //如果有自定义post内容，则写入自定义post数据，否则写入form（form优先）
+                    if (!string.IsNullOrEmpty(_customePostData))
+                        querystring = _customePostData;
+
+                    if (!string.IsNullOrEmpty(querystring))
+                        Console.WriteLine("\n请求参数: {0}", querystring);
+                    else
+                        Console.WriteLine("\n无请求参数");
+                    //处理请求参数
+                    using (var stream = _request.GetRequestStream())
+                    {
+                        byte[] postData = _postEncoding.GetBytes(querystring);
+                        stream.Write(postData, 0, postData.Length);
+                        stream.Close();
+                    }
+                }
+            }
+            submitRequestAsyc(_request);
+        }
+        //用_request 提交异步请求
+        private async void submitRequestAsyc(HttpWebRequest request)
+        {
+            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+            bool exception = false;
+            HttpStatusCode statusCode = HttpStatusCode.NotFound;
+            timer.Start();
+            try {
+                _response = (await request.GetResponseAsync()) as HttpWebResponse;
+               var str = EasyHttpUtils.ReadAllAsString(_response.GetResponseStream(), _responseEncoding);
+               statusCode = _response.StatusCode;
+               _cookieContainer.Add(_response.Cookies);
+                _response.Close();
+                LogHtml(str);
+                if (OnDataReturn != null)
+                {
+                    OnDataReturn.Invoke(this, new DataReturn("0", str));
+                }
+            }
+            catch (WebException ex)
+            {
+                _response = ex.Response as HttpWebResponse;
+                if (_response != null)
+                {
+                    var str = EasyHttpUtils.ReadAllAsString(_response.GetResponseStream(), _responseEncoding);
+                    statusCode = (ex.Response as HttpWebResponse).StatusCode;
+                    LogHtml(str);
+                    if (OnDataReturn != null)
+                    {
+                        OnDataReturn.Invoke(this, new DataReturn("0", str));
+                    }
+                }
+                else
+                {
+                    exception = true;
+                }
+            }
+            timer.Stop();
+
+            if (_logLevel != EasyHttpLogLevel.None)
+            {
+                try
+                {
+                    LogRequet();
+                    LogRespose();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("\nlog出错:" + e.Message);
+                }
+            }
+            Console.WriteLine("\n请求结果:");
+            if (exception)
+            {
+                var resStr = String.Format("请求异常,  耗时：{0} ms", timer.ElapsedMilliseconds);
+                Console.WriteLine(resStr);
+                if (OnDataReturn != null)
+                {
+                    //OnDataReturn.Invoke(this, new DataReturn("0", resStr));
+                }
+            }else{
+                long size = _response.ContentLength;
+                var resStr =　String.Format("请求结果: statuesCode:{0} , {1},  耗时：{2} ms, 返回结果大小：{3}", (int)statusCode, statusCode.ToString(), timer.ElapsedMilliseconds, size);
+                Console.WriteLine(resStr);
+                Console.WriteLine("\n");
+                if (OnDataReturn != null)
+                {
+                    //OnDataReturn.Invoke(this, new DataReturn("0", resStr));
+                }
+            }
+        }
+
         //打印请求参数
         private void LogRequestParams()
         {
+            Console.WriteLine("\n");
             if (_keyValues.Count > 0)
             {
                 foreach (KeyValue keyValue in _keyValues)
                 {
-                    Console.WriteLine("\t请求参数：");
-                    Console.WriteLine("{0} : {1} ",keyValue.Key,keyValue.Value);
+                    Console.WriteLine("请求参数(Data)：{0} : {1} ", keyValue.Key, keyValue.Value);
                 }
             }
+            if (_customePostData != null)
+            {
+                Console.WriteLine("请求参数(custom)： " + _customePostData);
+            }
+
+            if (_keyValues.Count <= 0 && string.IsNullOrEmpty(_customePostData))
+            {
+                Console.WriteLine("无请求参数");
+            }
+
         }
         //打印请求网页和请求头
-        private void LogRequet(string url,Method method)
+        private void LogRequet()
         {
             if(_logLevel== EasyHttpLogLevel.None) return;
             Console.WriteLine("\n");
@@ -542,22 +698,11 @@ namespace CC_GRASPTOOL
 
             if (_logLevel == EasyHttpLogLevel.Body || _logLevel==EasyHttpLogLevel.All)
             {
-                if (method == Method.POST){
-                    Console.WriteLine("Request_Body:");
-                    if (_customePostData != null){
-                        Console.WriteLine("\t _customePostData：" + _customePostData);
-                    }
-                    else{
-                        LogRequestParams();
-                    }
-                }
-                else{
-                    LogRequestParams();
-                }
+                LogRequestParams();
             }
         }
         //打印返回
-        private void LogRespose(string url, Method method)
+        private void LogRespose()
         {
             if (_logLevel == EasyHttpLogLevel.None) return;
             if (_logLevel == EasyHttpLogLevel.Header||_logLevel==EasyHttpLogLevel.All) {
@@ -587,6 +732,11 @@ namespace CC_GRASPTOOL
             LogHtml(str);
             return str;
         }
+        public void GetForStringAsyc()
+        {
+            ExecuteAsyc(Method.GET);
+        }
+
        //
         private bool IsResponseGzipCompress()
         {
@@ -601,10 +751,15 @@ namespace CC_GRASPTOOL
         public string PostForString()
         {
             var str = EasyHttpUtils.ReadAllAsString(ExecutForStream(Method.POST), _responseEncoding);
-            str = getResponseString(str);
             LogHtml(str);
             return str;
         }
+        //异步请求
+        public void PostForStringAsyc()
+        {
+            ExecuteAsyc(Method.POST);
+        }
+
         /// 用指定的post内容执行post请求
         public string PostForString(string postData)
         {
@@ -613,6 +768,13 @@ namespace CC_GRASPTOOL
             LogHtml(str);
             return str;
         }
+        //异步带参数
+        public void PostForStringAsyc(string postData)
+        {
+            _customePostData = postData;
+            ExecuteAsyc(Method.POST);
+        }
+
         /// 执行Put请求，获取返回的html
         public string PutForString()
         {
@@ -627,12 +789,12 @@ namespace CC_GRASPTOOL
             {
                 if (string.IsNullOrEmpty(html))
                 {
-                    Console.WriteLine("HTML is empty");
+                    Console.WriteLine("网页返回空");
                 }
                 else
                 {
-                    //TODO
-                    Console.WriteLine("HTML:");
+                    Console.WriteLine("\n");
+                    Console.WriteLine("网页返回值:");
                     Console.WriteLine(html);
                 }
             }

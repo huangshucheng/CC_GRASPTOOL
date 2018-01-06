@@ -23,3 +23,4 @@ C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.Properti
 C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.csproj.GenerateResource.Cache
 C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.exe
 C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.pdb
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.csprojResolveAssemblyReference.cache
