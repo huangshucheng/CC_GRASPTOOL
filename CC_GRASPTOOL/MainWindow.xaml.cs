@@ -60,12 +60,10 @@ namespace CC_GRASPTOOL
             //_cookieHeader = "PHPSESSID=483677829f2800a2dfdb19e8fba35575;CNZZDATA1271740069=1766148731-1514894551-%7C1515151149;PHPSESSID=483677829f2800a2dfdb19e8fba35575;UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8";
             //_cookieHeader = "PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7; CNZZDATA1271740069=1766148731-1514894551-%7C1515165502; PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7; UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8";
             //_cookieHeader = "PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7;";
-            _cookieHeader = "CNZZDATA1271992096=129419380-1515220033-%7C1515220033; PHPSESSID=lpnqqqkfj1n0a96ldhicjg6s86; UM_distinctid=160ca72d4886ff-0f00fd2f2-7f560309-3d10d-160ca72d4893d2";
+            //_cookieHeader = "CNZZDATA1271992096=129419380-1515220033-%7C1515220033; PHPSESSID=lpnqqqkfj1n0a96ldhicjg6s86; UM_distinctid=160ca72d4886ff-0f00fd2f2-7f560309-3d10d-160ca72d4893d2";
             //_cookieHeader = "PHPSESSID=52b9e106731a0b2f5d284fb034a6d7f0; CNZZDATA1271740069=1766148731-1514894551-%7C1515221887; PHPSESSID=52b9e106731a0b2f5d284fb034a6d7f0; UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8";
-
-            _cookieHeader = "openid=oYIFj1OeZn_GIyx5QZuuGUh5J7Wc";
+            //_cookieHeader = "openid=oYIFj1OeZn_GIyx5QZuuGUh5J7Wc";
             //openid=oYIFj1OeZn_GIyx5QZuuGUh5J7Wc
-
 
             //_dataInfoList.Add(new DataInfo("1", "cookie--ajdkfljdfjkdjfjdjfkld", "result", "state"));
             //_dataInfoList.Add(new DataInfo("2", "cookies2--hjfkjdk", "result2", "state2"));
@@ -79,6 +77,8 @@ namespace CC_GRASPTOOL
         {
             _dataInfoList.Clear();
             _dataReturnList.Clear();
+            _responseIndex = 0;
+            _requestIndex = 0;
             /*
             _requestIndex++;
             EasyHttp http = EasyHttp.With(_web3);
@@ -101,25 +101,21 @@ namespace CC_GRASPTOOL
                 _dataInfoList.Add(new DataInfo(_requestIndex.ToString(), "empty", "result", "state"));
             }
         */
-            //var ckipt = StringFromRichTextBox(ui_rtext_ckinput);
-           //Console.WriteLine("ckipt--->{0}", ckipt);
+            //var ckipt = StringFromRichTextBox(ui_text_numinput);
+            Console.WriteLine("ckipt--->{0}", ui_text_numinput.Text);
+            int reqCount = getReqCount();
+            Console.WriteLine("rec--->{0}", reqCount);
+            string sss = "jfkdljklfsjklfj\u8be5jkdslfjskldj";
+            Console.WriteLine("uni--->{0}", EasyHttpUtils.UnicodeDencode(sss));
+            
         }
-        private string StringFromRichTextBox(RichTextBox rtb)
-        {
-            TextRange textRange = new TextRange(
-                rtb.Document.ContentStart,
-                rtb.Document.ContentEnd
-            );
-            return textRange.Text;
-        }
-
         //btn2
         private void Button_Click_Request(object sender, RoutedEventArgs e)
         {
             string tmpweb = "";
             string tmpck = _cookieHeader;
-            string ckstr = StringFromRichTextBox(ui_rtext_ckinput);
-            string urlstr = StringFromRichTextBox(ui_rtext_urlinput);
+            string ckstr = ui_rtext_ckinput.Text;
+            string urlstr = ui_rtext_urlinput.Text;
 
             int lenc = ckstr.Length;
             int lenu = urlstr.Length;
@@ -135,19 +131,19 @@ namespace CC_GRASPTOOL
             else {
                 Console.WriteLine("网址错误");
             }
-
-            int recount = 1;
+            int recount = getReqCount();
+            Console.WriteLine("请求次数：{0}", recount);
             for (int i = 0; i < recount;++i)
             {
                 EasyHttp http = EasyHttp.With(tmpweb);
                 if (http == null) return;
                 http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
                 //请求内容表单
-                //http.Data("code", "6422");
+                //http.Data("code", "9405");
                 //添加请求头
                 //http.AddHeadersByDic(_reqHeaderDic);   
                 //设置cookie
-                http.SetCookieHeader(tmpck);
+                //http.SetCookieHeader(tmpck);
                 //请求
                 http.PostForStringAsyc();
                 http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
@@ -163,6 +159,28 @@ namespace CC_GRASPTOOL
                 tmpStr = tmpStr.Substring(0, 200);
             }
             _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));    
+        }
+
+        private int getReqCount()
+        {
+            int reqcount = 1;
+            int nstr = 0;
+            string cstr = ui_text_numinput.Text;
+            if(string.IsNullOrEmpty(cstr)){
+                return reqcount;            
+            }
+            try{
+                nstr = int.Parse(cstr);
+            }
+            catch (Exception e){
+                Console.WriteLine("error:"+e.Message);
+            }
+            if(nstr > 0){
+                reqcount = nstr;
+            }
+            if (reqcount > 50)
+                reqcount = 50;      //最多请求50次
+            return reqcount;
         }
     }
 }

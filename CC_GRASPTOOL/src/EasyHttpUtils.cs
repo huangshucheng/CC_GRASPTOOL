@@ -218,6 +218,9 @@ namespace CC_GRASPTOOL
         }
         public static string CheckIsWithHttp(string Value)
         {
+            if(Value.Length < 8){
+                return Value;
+            }
             if ((Value.Substring(0, 7) != "http://") && (Value.Substring(0, 8) != "https://"))
             {
                 Value = "http://" + Value;
@@ -293,6 +296,36 @@ namespace CC_GRASPTOOL
           content = re.Replace(content, "\n");
           return content;
       }
+      //unicode 转中文
+      public static string UnicodeDencode(string str)
+      {
+          if (string.IsNullOrWhiteSpace(str))
+              return str;
+          string tmpstr = str;
+          try {
+              tmpstr = Regex.Unescape(str);
+          }
+          catch(Exception e){
+              Console.WriteLine("UnicodeDencode error:{0}",e.Message);
+          }
+          return tmpstr;
+      }
+      //中文转unicode
+      public static string UnicodeEncode(string str)
+      {
+          if (string.IsNullOrWhiteSpace(str))
+              return str;
+          StringBuilder strResult = new StringBuilder();
+          if (!string.IsNullOrEmpty(str))
+          {
+              for (int i = 0; i < str.Length; i++)
+              {
+                  strResult.Append("\\u");
+                  strResult.Append(((int)str[i]).ToString("x4"));
+              }
+          }
+          return strResult.ToString();
+      }  
 
     }
 }

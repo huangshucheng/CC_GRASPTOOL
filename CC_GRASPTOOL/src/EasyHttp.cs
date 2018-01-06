@@ -600,7 +600,9 @@ namespace CC_GRASPTOOL
                 LogHtml(str);
                 if (OnDataReturn != null)
                 {
-                    OnDataReturn.Invoke(this, new DataReturn("0", str));
+
+                    OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));
+                   // OnDataReturn.Invoke(this, new DataReturn("0", str));
                 }
             }
             catch (WebException ex)
@@ -613,7 +615,8 @@ namespace CC_GRASPTOOL
                     LogHtml(str);
                     if (OnDataReturn != null)
                     {
-                        OnDataReturn.Invoke(this, new DataReturn("0", str));
+                        //OnDataReturn.Invoke(this, new DataReturn("0", str));
+                        OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));
                     }
                 }
                 else
@@ -632,7 +635,7 @@ namespace CC_GRASPTOOL
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("\nlog出错:" + e.Message);
+                    Console.WriteLine("\nsubmitRequestAsyc error:" + e.Message);
                 }
             }
             Console.WriteLine("\n请求结果:");
@@ -795,7 +798,7 @@ namespace CC_GRASPTOOL
                 {
                     Console.WriteLine("\n");
                     Console.WriteLine("网页返回值:");
-                    Console.WriteLine(html);
+                    Console.WriteLine(EasyHttpUtils.UnicodeDencode(html));
                 }
             }
         }

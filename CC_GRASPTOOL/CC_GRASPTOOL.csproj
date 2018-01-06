@@ -86,7 +86,6 @@
     <Compile Include="src\EasyHttp.cs" />
     <Compile Include="src\EasyHttpHeaderApi.cs" />
     <Compile Include="src\EasyHttpUtils.cs" />
-    <Compile Include="src\HTTPClient.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
