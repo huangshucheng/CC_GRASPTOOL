@@ -1,17 +1,2 @@
-1.请求的网页地址
-2.cookies
-
-cookies的生成：
-第一次客户端生成临时Cookies值去访问服务端，服务端计算后，生成cookies发送到客户端，客户端保存此cookies，此后的交互，用此cookies和服务端验证
-临时cookies值：
-	CNZZDATA1271740069=1766148731-1514894551-%7C1515165502
-	UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8
-
-服务端返回cookies值：
-	PHPSESSID=a9ffebedbc0482a42d4f56972cf7518b
-
-此后请求服务端所用cookies值：
-	PHPSESSID=a9ffebedbc0482a42d4f56972cf7518b
-	CNZZDATA1271740069=1766148731-1514894551-%7C1515165502
-	PHPSESSID=a9ffebedbc0482a42d4f56972cf7518b
-	UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8
+1.请求的网页地址（发送post的地址，参数和刚进活动页面的地址不一样）
+2.cookies（和1地址的签名要对应）

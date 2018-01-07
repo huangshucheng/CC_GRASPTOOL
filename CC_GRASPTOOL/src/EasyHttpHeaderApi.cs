@@ -8,24 +8,6 @@ namespace CC_GRASPTOOL
 {
  public   partial class EasyHttp
     {
-
-        /*
-         * 受限制的标头包括︰
-               接受
-               连接
-               内容长度
-               内容类型
-               日期
-               期望
-               Host
-               如果-修改-自
-               范围
-               引用站点
-               传送编码
-               用户代理
-               代理连接
-         //http://blog.csdn.net/u011127019/article/details/52571317
-         */
         #region 设置头信息
         /// 设置自定义头部键值对
   

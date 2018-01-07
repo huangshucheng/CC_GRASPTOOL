@@ -167,7 +167,7 @@ namespace CC_GRASPTOOL
             _defaultHeaderRequest.Timeout = timeout;
             return this;
         }
-        /// 添加一系列参数
+        /// 添加一系列参数(body)
         public EasyHttp Data(List<KeyValue> keyValues)
         {
             this._keyValues.AddRange(keyValues);

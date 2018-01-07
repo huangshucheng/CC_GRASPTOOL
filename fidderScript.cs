@@ -163,15 +163,26 @@ class Handlers
         //     oSession.oFlags["x-breakrequest"] = "yup";	// Existence of the x-breakrequest flag creates a breakpoint; the "yup" value is unimportant.
         // }
 
-       // MessageBox.Show("Fiddler OnBeforeRequest hcc----");
-         //Console.WriteLine("hcc----------------------->");
+        // MessageBox.Show("Fiddler OnBeforeRequest hcc----");
+        //Console.WriteLine("hcc----------------------->");
         //if(oSession.HostnameIs("www.baidu.com")){
-          //  oSession.hostname = "www.sina.com.cn";
-           // }
+        //  oSession.hostname = "www.sina.com.cn";
+        // }
+        
+        var reCookie = oSession.oRequest.headers["Cookie"];
+        var rehost = oSession.oRequest.host;
+        var reUrl = oSession.url;
+        var reFurl = oSession.fullUrl;
+        
+        if(reCookie.Length > 0){
+            var str = "reCookie:" + reCookie;
+            //MessageBox.Show(str);
+        }
+        
         
         if ((null != gs_ReplaceToken) && (oSession.url.indexOf(gs_ReplaceToken)>-1)) {   // Case sensitive
-                oSession.url = oSession.url.Replace(gs_ReplaceToken, gs_ReplaceTokenWith); 
-            }
+            oSession.url = oSession.url.Replace(gs_ReplaceToken, gs_ReplaceTokenWith); 
+        }
         if ((null != gs_OverridenHost) && (oSession.host.toLowerCase() == gs_OverridenHost)) {
             oSession["x-overridehost"] = gs_OverrideHostWith; 
         }
@@ -286,10 +297,16 @@ class Handlers
             oSession["ui-hide"] = "true";
         }
         var cookie = oSession.oResponse.headers["Set-Cookie"];
+        //host :wx.vivatech.cn
+        var host = oSession.host;
+        var hostName = oSession.hostname;
+        //url:host和后面的表单
+        var urlstr = oSession.url;
+
         var len = cookie.Length;
         if(cookie != null && cookie.Length > 0){
          var str = "Set-Cookie:" + cookie;
-            MessageBox.Show(str);
+            //MessageBox.Show(urlstr);
         }
     }
 
@@ -349,8 +366,8 @@ class Handlers
     // The Main() function runs everytime your FiddlerScript compiles
             static function Main() {
             var today: Date = new Date();
-            FiddlerObject.StatusText = " CustomRules.js was loaded at: " + today;
-
+            //FiddlerObject.StatusText = " CustomRules.js was loaded at: " + today;
+            FiddlerObject.StatusText = " CustomRules.js was loaded at: " + "hcc";
             // Uncomment to add a "Server" column containing the response "Server" header, if present
             // UI.lvSessions.AddBoundColumn("Server", 50, "@response.server");
 
