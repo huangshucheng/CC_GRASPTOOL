@@ -112,25 +112,25 @@ namespace CC_GRASPTOOL
         //btn2
         private void Button_Click_Request(object sender, RoutedEventArgs e)
         {
-            string tmpweb = "";
-            string tmpck = _cookieHeader;
-            string ckstr = ui_rtext_ckinput.Text;
-            string urlstr = ui_rtext_urlinput.Text;
-
-            int lenc = ckstr.Length;
-            int lenu = urlstr.Length;
+            string tmpweb       = "";
+            string tmpparam     = "";
+            string tmpck        = _cookieHeader;
+            string ckstr        = ui_rtext_ckinput.Text;
+            string urlstr       = ui_rtext_urlinput.Text;
+            string paramstr     = ui_text_paraminput.Text;
 
             if(!string.IsNullOrEmpty(ckstr)){
                 tmpck = ckstr;
             }
 
-            if (!string.IsNullOrEmpty(urlstr) && EasyHttpUtils.CheckIsUrlFormat(urlstr))
-            {
+            if (!string.IsNullOrEmpty(urlstr) && EasyHttpUtils.CheckIsUrlFormat(urlstr)){
                 tmpweb = urlstr;
             }
-            else {
-                Console.WriteLine("网址错误");
+
+            if(!string.IsNullOrEmpty(paramstr)){
+                tmpparam = paramstr;    //TODO  验证
             }
+
             int recount = getReqCount();
             Console.WriteLine("请求次数：{0}", recount);
             for (int i = 0; i < recount;++i)
@@ -141,14 +141,20 @@ namespace CC_GRASPTOOL
                 //请求内容表单
                 //http.Data("code", "9405");
                 //添加请求头
-                //http.AddHeadersByDic(_reqHeaderDic);   
+                http.AddHeadersByDic(_reqHeaderDic);   
                 //设置cookie
-                //http.SetCookieHeader(tmpck);
+                http.SetCookieHeader(tmpck);
                 //请求
-                http.PostForStringAsyc();
+                http.PostForStringAsyc(tmpparam);
                 http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
             }
-        } 
+        }
+
+        private void Button_Click_Cookie(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("开始套cookie");
+        }
+
         private void addDataReturn(object sender,DataReturn data)
         {
             _responseIndex++;

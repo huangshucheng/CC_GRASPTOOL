@@ -3,8 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="辅助byhcc" Height="830.5" Width="800">
     <Grid RenderTransformOrigin="0.5,0.5">
-        <Button Content="清空数据" HorizontalAlignment="Left" Margin="39,678,0,0" VerticalAlignment="Top" Width="114" Click="Button_Click_Clear" Height="42"/>
-        <Button Content="用cookie请求网页" HorizontalAlignment="Left" Margin="189,678,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_Request" Height="42"/>
+        <Button Content="清空数据" HorizontalAlignment="Left" Margin="113,710,0,0" VerticalAlignment="Top" Width="114" Click="Button_Click_Clear" Height="42"/>
+        <Button Content="请求网页" HorizontalAlignment="Left" Margin="536,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_Request" Height="42"/>
+        <Button Content="开始套cookies" HorizontalAlignment="Left" Margin="318,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_Cookie" Height="42"/>
+
         <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="187" VerticalAlignment="Top" Width="782">
             <ListView.View>
                 <GridView>
@@ -28,6 +30,7 @@
                  Height="60" Margin="69,554,0,0" 
                  VerticalAlignment="Top" 
                  Width="697"
+                 AcceptsReturn="True"
                  Text="">
         </TextBox>
         <TextBox x:Name="ui_rtext_urlinput" 
@@ -36,17 +39,29 @@
                  Margin="69,489,0,0" 
                  VerticalAlignment="Top" 
                  Width="697"
+                 AcceptsReturn="True"
                  Text="">
         </TextBox>
         <TextBox Name="ui_text_numinput" 
                  HorizontalAlignment="Left" 
-                 Height="31" Margin="69,620,0,0" 
+                 Height="29" Margin="69,620,0,0" 
                  TextWrapping="Wrap" 
                  VerticalAlignment="Top" 
                  Width="63"
+                 AcceptsReturn="True"
                  Text="1" />
         <Label Content="url:" HorizontalAlignment="Left" Margin="24,508,0,0" VerticalAlignment="Top"/>
         <Label Content="cookie:" HorizontalAlignment="Left" Margin="10,572,0,0" VerticalAlignment="Top"/>
         <Label Content="请求次数:" HorizontalAlignment="Left" Margin="3,620,0,0" VerticalAlignment="Top"/>
+        <Label Content="请求参数:" HorizontalAlignment="Left" Margin="179,624,0,0" VerticalAlignment="Top"/>
+        <Label Content="参数用&amp;连接,例: code=1020&amp;num=1235" HorizontalAlignment="Left" Margin="252,678,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="ui_text_paraminput" 
+        	HorizontalAlignment="Left" 
+        	Height="53" Margin="252,620,0,0" 
+        	TextWrapping="Wrap" 
+        	VerticalAlignment="Top" 
+        	Width="514"
+            AcceptsReturn="True"
+        	Text="" />
     </Grid>
 </Window>
