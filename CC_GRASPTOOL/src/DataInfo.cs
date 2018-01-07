@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace CC_GRASPTOOL
 {
-    class DataInfo:INotifyPropertyChanged 
+    public class DataInfo:INotifyPropertyChanged 
     {
         private string  _ck_id;
         private string  _ck_cookie;

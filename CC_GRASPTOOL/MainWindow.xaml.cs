@@ -16,6 +16,8 @@ using System.IO;
 using System.Threading;
 using System.Collections.ObjectModel;
 
+//using Fidder;
+
 
 namespace CC_GRASPTOOL
 {
@@ -102,15 +104,15 @@ namespace CC_GRASPTOOL
             }
         */
             //var ckipt = StringFromRichTextBox(ui_text_numinput);
-            Console.WriteLine("ckipt--->{0}", ui_text_numinput.Text);
-            int reqCount = getReqCount();
-            Console.WriteLine("rec--->{0}", reqCount);
-            string sss = "jfkdljklfsjklfj\u8be5jkdslfjskldj";
-            Console.WriteLine("uni--->{0}", EasyHttpUtils.UnicodeDencode(sss));
+            //Console.WriteLine("ckipt--->{0}", ui_text_numinput.Text);
+            //int reqCount = getReqCount();
+            //Console.WriteLine("rec--->{0}", reqCount);
+            //string sss = "jfkdljklfsjklfj\u8be5jkdslfjskldj";
+            //Console.WriteLine("uni--->{0}", EasyHttpUtils.UnicodeDencode(sss));
             
         }
         //btn2
-        private void Button_Click_Request(object sender, RoutedEventArgs e)
+        private void Button_Click_HandReq(object sender, RoutedEventArgs e)
         {
             string tmpweb       = "";
             string tmpparam     = "";
@@ -150,9 +152,22 @@ namespace CC_GRASPTOOL
             }
         }
 
-        private void Button_Click_Cookie(object sender, RoutedEventArgs e)
+        private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("开始套cookie");
+            Console.WriteLine("开始读配置");
+            TxtFileUtil t = new TxtFileUtil();
+            t.readFileToList();
+            t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
+        }
+
+        private void addTxtReturn(object sender, DataInfo data)
+        {
+            _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_result, data.ck_state));
+        }
+
+        private void Button_Click_ConfigReq(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("用配置请求...");
         }
 
         private void addDataReturn(object sender,DataReturn data)

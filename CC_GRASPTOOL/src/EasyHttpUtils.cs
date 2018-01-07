@@ -325,7 +325,16 @@ namespace CC_GRASPTOOL
               }
           }
           return strResult.ToString();
-      }  
-
+      }
+      //去除空格字符
+      public static string RemoveSpace(string content)
+      {
+          return new Regex(@"\s").Replace(content + "", string.Empty);
+      }
+      //替换换行
+      public static string ReplaceNewline(string content, string newValue)
+      {
+          return (content + "").Replace("\n\r", newValue).Replace("\r\n", newValue).Replace("\r", newValue).Replace("\n", newValue).Replace("\t", newValue);
+      }
     }
 }

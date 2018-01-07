@@ -75,6 +75,7 @@
     <Compile Include="src\DataInfo.cs" />
     <Compile Include="src\KeyValue.cs" />
     <Compile Include="src\DataReturn.cs" />
+    <Compile Include="src\TxtFileUtil.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

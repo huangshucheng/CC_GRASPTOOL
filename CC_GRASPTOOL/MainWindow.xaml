@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="辅助byhcc" Height="830.5" Width="800">
     <Grid RenderTransformOrigin="0.5,0.5">
-        <Button Content="清空数据" HorizontalAlignment="Left" Margin="113,710,0,0" VerticalAlignment="Top" Width="114" Click="Button_Click_Clear" Height="42"/>
-        <Button Content="请求网页" HorizontalAlignment="Left" Margin="536,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_Request" Height="42"/>
-        <Button Content="开始套cookies" HorizontalAlignment="Left" Margin="318,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_Cookie" Height="42"/>
-
-        <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="187" VerticalAlignment="Top" Width="782">
+        <Button Content="清空数据" HorizontalAlignment="Left" Margin="69,710,0,0" VerticalAlignment="Top" Width="114" Click="Button_Click_Clear" Height="42"/>
+        <Button Content="手动请求" HorizontalAlignment="Left" Margin="198,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_HandReq" Height="42"/>
+        <Button Content="开始读配置" HorizontalAlignment="Left" Margin="435,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ReadConf" Height="42"/>
+        <Button Content="用配置请求" HorizontalAlignment="Left" Margin="559,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ConfigReq" Height="42"/>
+        <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="249" VerticalAlignment="Top" Width="782">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="序号" Width="50" DisplayMemberBinding ="{Binding ck_id}"/>
@@ -17,7 +17,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <ListView x:Name="ui_listview_return" HorizontalAlignment="Left" Height="291" VerticalAlignment="Top" Width="782" Margin="0,192,0,0">
+        <ListView x:Name="ui_listview_return" HorizontalAlignment="Left" Height="229" VerticalAlignment="Top" Width="782" Margin="0,254,0,0">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="id" Width="50" DisplayMemberBinding ="{Binding return_id}"/>
