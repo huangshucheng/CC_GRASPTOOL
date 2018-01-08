@@ -90,9 +90,10 @@ class Handlers
 	static var _hostCompare      = "wx.vivatech.cn";
 	//static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
 		
-	static var _static_ck 		= "cookiePath= ";     //固定值,解析cookie
-	static var _static_url 		= "fullUrlPath= ";    //固定值,解析Url
-	static var _static_body		= "reqBodyPath= ";	  //固定值，解析body
+	static var _static_ck 		= "hcc_cookiePath= ";     //固定值,解析cookie
+	static var _static_url 		= "hcc_fullUrlPath= ";    //固定值,解析Url
+	static var _static_body		= "hcc_reqBodyPath= ";	  //固定值，解析body
+		
 	//音效地址
 	static var _soundPath		 = Environment.CurrentDirectory + "\\LoadScript.wav";
 	//是否记录请求地址
