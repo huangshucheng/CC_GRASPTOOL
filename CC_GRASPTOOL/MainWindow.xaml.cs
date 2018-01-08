@@ -33,7 +33,6 @@ namespace CC_GRASPTOOL
         ObservableCollection<DataReturn> _dataReturnList = new ObservableCollection<DataReturn>();
         string _cookieHeader = string.Empty;
         int _responseIndex = 0;
-        int _requestIndex = 0;
         string _web  = "http://www.baidu.com";
         string _web1 = "http://www.chenkaihua.com";
         string _web2 = "https://wx.vivatech.cn/app/index.php?i=2&c=entry&fromuser=ot7eUuOEL5zSTiEWKEaf7eqeth_s&sign=bb33QB3lZbVmVl1kTc02VlMnNbXgpO0O0OTO0O0OVGlFV0tFYWY3ZXFldGhfcwO0O0OO0O0O&do=compare&m=viva_njfh_4thyears";
@@ -59,59 +58,23 @@ namespace CC_GRASPTOOL
             _reqHeaderDic.Add("Connection", "keep-alive");
             _reqHeaderDic.Add("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13G34 MicroMessenger/6.6.1 NetType/WIFI Language/zh_CN");
             //设置cookies
-            //_cookieHeader = "PHPSESSID=483677829f2800a2dfdb19e8fba35575;CNZZDATA1271740069=1766148731-1514894551-%7C1515151149;PHPSESSID=483677829f2800a2dfdb19e8fba35575;UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8";
-            //_cookieHeader = "PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7; CNZZDATA1271740069=1766148731-1514894551-%7C1515165502; PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7; UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8";
             //_cookieHeader = "PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7;";
-            //_cookieHeader = "CNZZDATA1271992096=129419380-1515220033-%7C1515220033; PHPSESSID=lpnqqqkfj1n0a96ldhicjg6s86; UM_distinctid=160ca72d4886ff-0f00fd2f2-7f560309-3d10d-160ca72d4893d2";
-            //_cookieHeader = "PHPSESSID=52b9e106731a0b2f5d284fb034a6d7f0; CNZZDATA1271740069=1766148731-1514894551-%7C1515221887; PHPSESSID=52b9e106731a0b2f5d284fb034a6d7f0; UM_distinctid=160b6e1daae7f7-0170cb6d9-7f560309-3d10d-160b6e1daaf6b8";
             //_cookieHeader = "openid=oYIFj1OeZn_GIyx5QZuuGUh5J7Wc";
-            //openid=oYIFj1OeZn_GIyx5QZuuGUh5J7Wc
 
-            //_dataInfoList.Add(new DataInfo("1", "cookie--ajdkfljdfjkdjfjdjfkld", "result", "state"));
             //_dataInfoList.Add(new DataInfo("2", "cookies2--hjfkjdk", "result2", "state2"));
-            //_dataReturnList.Add(new DataReturn("1", "return"));
             //_dataReturnList.Add(new DataReturn("1", "return"));
 
             ui_listview_ck.ItemsSource = _dataInfoList;
             ui_listview_return.ItemsSource = _dataReturnList;
         }
+        //清除
         private void Button_Click_Clear(object sender, RoutedEventArgs e)
         {
             _dataInfoList.Clear();
             _dataReturnList.Clear();
             _responseIndex = 0;
-            _requestIndex = 0;
-            /*
-            _requestIndex++;
-            EasyHttp http = EasyHttp.With(_web3);
-            if(http == null)return;
-            http.LogLevel(EasyHttp.EasyHttpLogLevel.None);
-            http.GetForString();
-            _cooDic = http.Cookies();
-            var cookiesCount = _cooDic.Count();
-            if(cookiesCount ==  0)
-                Console.WriteLine("------------->没有cookies");
-            else
-                Console.WriteLine("---------------->有cookies");
-            string ckurl = http.CookieHeader();
-            if (!string.IsNullOrEmpty(ckurl))
-            {
-                _dataInfoList.Add(new DataInfo(_requestIndex.ToString(), ckurl, "result", "state"));
-            }
-            else
-            {
-                _dataInfoList.Add(new DataInfo(_requestIndex.ToString(), "empty", "result", "state"));
-            }
-        */
-            //var ckipt = StringFromRichTextBox(ui_text_numinput);
-            //Console.WriteLine("ckipt--->{0}", ui_text_numinput.Text);
-            //int reqCount = getReqCount();
-            //Console.WriteLine("rec--->{0}", reqCount);
-            //string sss = "jfkdljklfsjklfj\u8be5jkdslfjskldj";
-            //Console.WriteLine("uni--->{0}", EasyHttpUtils.UnicodeDencode(sss));
-            
         }
-        //btn2
+        //手动请求
         private void Button_Click_HandReq(object sender, RoutedEventArgs e)
         {
             string tmpweb       = "";
@@ -130,7 +93,7 @@ namespace CC_GRASPTOOL
             }
 
             if(!string.IsNullOrEmpty(paramstr)){
-                tmpparam = paramstr;    //TODO  验证
+                tmpparam = paramstr;    //TODO  验证请求参数
             }
 
             int recount = getReqCount();
@@ -151,7 +114,7 @@ namespace CC_GRASPTOOL
                 http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
             }
         }
-
+        //读取配置
         private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("开始读配置");
@@ -159,17 +122,38 @@ namespace CC_GRASPTOOL
             t.readFileToList();
             t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
         }
-
+        //读取配置，写如UI
         private void addTxtReturn(object sender, DataInfo data)
         {
             _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_result, data.ck_state));
         }
-
+        //用配置请求
         private void Button_Click_ConfigReq(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("用配置请求...");
+            int recount = getReqCount();
+            for (int ct = 0; ct < recount; ++ct) {
+                for (int i = 0; i < _dataInfoList.Count; ++i)
+                {
+                    var url = _dataInfoList[i].ck_state;
+                    var body = _dataInfoList[i].ck_result;
+                    var cookie = _dataInfoList[i].ck_cookie;
+                    EasyHttp http = EasyHttp.With(url);
+                    if (http == null) return;
+                    http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
+                    //请求内容
+                    //http.Data("code", "9405");
+                    //添加请求头
+                    http.AddHeadersByDic(_reqHeaderDic);
+                    //设置cookie
+                    http.SetCookieHeader(cookie);
+                    //请求
+                    http.PostForStringAsyc(body);   //请求内容放在这里也可
+                    http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
+                }
+            }
         }
-
+        //请求结果显示到UI
         private void addDataReturn(object sender,DataReturn data)
         {
             _responseIndex++;
@@ -179,9 +163,10 @@ namespace CC_GRASPTOOL
             {
                 tmpStr = tmpStr.Substring(0, 200);
             }
-            _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));    
+            _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));
+           
         }
-
+        //控制请求次数
         private int getReqCount()
         {
             int reqcount = 1;

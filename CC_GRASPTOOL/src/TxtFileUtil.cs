@@ -10,31 +10,19 @@ namespace CC_GRASPTOOL
 {
     public class TxtFileUtil
     {
-        private static string _txtName = "\\cookies.txt";
-        private static string _filePath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + _txtName;
-        private 　List<string> _cookieList = new List<string>();
-        private 　List<string> _urlList = new List<string>();
-        private 　Dictionary<string, string> _ck_urlDic = new Dictionary<string, string>();
+        private static string _txtName       = "\\cookies.txt";
+        private static string _filePath      = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + _txtName;
+        private 　List<string> _cookieList   = new List<string>();
+        private 　List<string> _urlList      = new List<string>();
+        private   List<string> _bodyList     = new List<string>();
         //定义一个delegate委托
         public 　delegate void TxtReturnHandler(object sender , DataInfo data);
         public   event TxtReturnHandler OnTxtReturn;
-        int _ck_count = 0;
         public async void readFileToList()
         {
-            //FileStream fs = File.Open(_filePath, FileMode.Open, FileAccess.ReadWrite);
-            //fs.Close();
-            //File.AppendAllText()
-            /*
-            var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read,FileShare.ReadWrite);
-            var sw = new StreamWriter(fs);
-            sw.Write("");
-            sw.WriteLine("");
-            sw.Flush();
-            sw.Close();
-            */
             _cookieList.Clear();
             _urlList.Clear();
-            _ck_urlDic.Clear();
+            _bodyList.Clear();
             if (string.IsNullOrEmpty(_filePath))
             {
                 return;
@@ -73,22 +61,44 @@ namespace CC_GRASPTOOL
             if(string.IsNullOrEmpty(txtString)){
                 return;
             }
-            string[] sArray = Regex.Split(txtString, "cookiePath=", RegexOptions.IgnoreCase);
+
+            var __tmpstr = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(txtString, string.Empty));
+            //Console.WriteLine("去换行:"+ __tmpstr);
+            
+            string[] sArray = Regex.Split(__tmpstr, "hcc_cookiePath=", RegexOptions.IgnoreCase);
             int i = 0;
-            foreach (string str in sArray)
+            int j = 0;
+            foreach (string str_1 in sArray)
             {
-                if(!string.IsNullOrEmpty(str))
+                if(!string.IsNullOrEmpty(str_1))
                 {
-                    string[] subArr = Regex.Split(EasyHttpUtils.RemoveSpace(str), "fullUrlPath=", RegexOptions.IgnoreCase);
-                    foreach (string sstr in subArr)
+                    i++;
+                    var cookieStr = string.Empty;
+                    var urlStr = string.Empty;
+                    var bodyStr = string.Empty;
+
+                    //Console.WriteLine("分割(one) " + i.ToString()+ "  :" + str_1);
+                    string[] sArray_1 = Regex.Split(str_1, "hcc_fullUrlPath=", RegexOptions.IgnoreCase);
+                    foreach (string str_2 in sArray_1) 
                     {
-                        if(!string.IsNullOrEmpty(sstr)){
-                            i++;
-                            var restr = EasyHttpUtils.ReplaceNewline(sstr, string.Empty);
-                            if (i % 2 == 0)
-                                _urlList.Add(restr);
-                            else
-                                _cookieList.Add(restr);
+                        //Console.WriteLine("分割(two) " + i.ToString() + "  :" + str_2);
+                        string[] sArray_2 = Regex.Split(str_2, "hcc_reqBodyPath=", RegexOptions.IgnoreCase);
+                        foreach (string str_3 in sArray_2)
+                        {
+                            j++;
+                            //Console.WriteLine("分割(three) " + i.ToString() + "  :" + str_3);
+                            //Console.WriteLine("分割(three) " + j.ToString() + "  :" + str_3);
+                            if(j%3==0){
+                                _bodyList.Add(str_3);
+                            }else if(j%3==1){
+                                _cookieList.Add(str_3);
+                            }else if(j%3==2){
+                                var ts = str_3;
+                                if (ts.Length > 250){
+                                    ts = str_3.Substring(0, 200);
+                                }
+                                _urlList.Add(ts);
+                            }
                         }
                     }
                 }
@@ -96,29 +106,30 @@ namespace CC_GRASPTOOL
 
             foreach(string cookies in _cookieList)
             {
-              //  Console.WriteLine("cookies = " + cookies.ToString());
+                //Console.WriteLine("cookies = " + cookies.ToString());
             }
 
             foreach (string url in _urlList)
             {
-               // Console.WriteLine("url = " + url.ToString());
+                //Console.WriteLine("url = " + url.ToString());
+            }
+
+            foreach (string body in _bodyList)
+            {
+                //Console.WriteLine("body = " + body.ToString());
             }
 
             for (int ct = 0; ct < _cookieList.Count; ct++ )
             {
-                _ck_urlDic.Add(_cookieList[ct],_urlList[ct]);
-            }
-
-            foreach(var obj in _ck_urlDic){
-                Console.WriteLine("ck: " + obj.Key + " ,url: " + obj.Value);
-                _ck_count++;
                 if (OnTxtReturn != null)
                 {
-                    OnTxtReturn.Invoke(this, new DataInfo(Convert.ToString(_ck_count), obj.Key, "result", "state"));
+                    OnTxtReturn.Invoke(this, new DataInfo(Convert.ToString(ct+1), _cookieList[ct], _bodyList[ct],_urlList[ct]));
                 }
-                else {
+                else
+                {
                     Console.WriteLine("OnTextReturn == null");
                 }
+
             }
         }
 
