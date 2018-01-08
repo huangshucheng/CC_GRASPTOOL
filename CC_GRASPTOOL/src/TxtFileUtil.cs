@@ -21,6 +21,17 @@ namespace CC_GRASPTOOL
         int _ck_count = 0;
         public async void readFileToList()
         {
+            //FileStream fs = File.Open(_filePath, FileMode.Open, FileAccess.ReadWrite);
+            //fs.Close();
+            //File.AppendAllText()
+            /*
+            var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read,FileShare.ReadWrite);
+            var sw = new StreamWriter(fs);
+            sw.Write("");
+            sw.WriteLine("");
+            sw.Flush();
+            sw.Close();
+            */
             _cookieList.Clear();
             _urlList.Clear();
             _ck_urlDic.Clear();
@@ -33,7 +44,7 @@ namespace CC_GRASPTOOL
             {
                 Console.WriteLine("存在：" + _filePath);
                 try {
-                    FileStream fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read);
+                    FileStream fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read,FileShare.ReadWrite);
                     StreamReader streamReader = new StreamReader(fs,Encoding.UTF8);
                     streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
                     string filestr = await streamReader.ReadToEndAsync();
@@ -47,9 +58,13 @@ namespace CC_GRASPTOOL
             }
             else
             {
-                System.IO.FileInfo fileInfo = new System.IO.FileInfo(_filePath);
-                fileInfo.Create();
                 Console.WriteLine("不存在：" + _filePath);
+                try {
+                    FileStream fs = File.Create(_filePath);
+                    fs.Close();
+                }catch(Exception e){
+                    Console.WriteLine("创建文件出错:" + e.Message);
+                }
             }
         }
 

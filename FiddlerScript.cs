@@ -1,4 +1,4 @@
-import System;
+Ôªøimport System;
 import System.Windows.Forms;
 import Fiddler;
 import System.IO;
@@ -81,24 +81,27 @@ class Handlers
     */
         
             
-    /////////////////////////◊‘∂®“Â◊÷∑˚¥Æ /////////////////////////// 
+	/////////////////////////Ëá™ÂÆö‰πâÂ≠óÁ¨¶‰∏≤ /////////////////////////// 
         
-            
-    static var _static_ck = "cookiePath=";     //πÃ∂®÷µ
-    static var _static_url = "fullUrlPath=";   //πÃ∂®÷µ
-    // ‰≥ˆŒƒº˛±£¥Ê¬∑æ∂      
-    static var _filePath: String = "C:\\Users\\95\\Desktop\\cookies.txt";
-    //hostπ˝¬À,Œ™ø’‘Ú±£¥ÊÀ˘”–cookie,(≤ª¥¯http://)
-    //static var _hostCompare      = "wx.vivatech.cn";
-    //static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
-    static var _hostCompare    = "";
-    //“Ù–ßµÿ÷∑
-    static var _soundPath        = "C:\\Users\\95\\AppData\\Local\\Programs\\Fiddler\\LoadScript.wav";
-    // «∑Òº«¬º«Î«Ûµÿ÷∑
-    static var _isWriteUrl       = true;
-        
-                    
-    /////////////////////////◊‘∂®“Â◊÷∑˚¥Æ ///////////////////////////    
+	//ËæìÂá∫Êñá‰ª∂‰øùÂ≠òË∑ØÂæÑ(Áî®Êà∑‰øÆÊîπ)     
+	static var _filePath: String = "C:\\Users\\95\\Desktop\\cookies.txt";
+	//hostËøáÊª§,‰∏∫Á©∫Âàô‰øùÂ≠òÊâÄÊúâcookie,(‰∏çÂ∏¶http://) Áî®Êà∑‰øÆÊîπ
+	//static var _hostCompare      = "www.baidu.com";
+	static var _hostCompare      = "wx.vivatech.cn";
+	//static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
+		
+	static var _static_ck 		= "cookiePath= ";     //Âõ∫ÂÆöÂÄº,Ëß£Êûêcookie
+	static var _static_url 		= "fullUrlPath= ";    //Âõ∫ÂÆöÂÄº,Ëß£ÊûêUrl
+	static var _static_body		= "reqBodyPath= ";	  //Âõ∫ÂÆöÂÄºÔºåËß£Êûêbody
+	//Èü≥ÊïàÂú∞ÂùÄ
+	static var _soundPath		 = Environment.CurrentDirectory + "\\LoadScript.wav";
+	//ÊòØÂê¶ËÆ∞ÂΩïËØ∑Ê±ÇÂú∞ÂùÄ
+	static var _isWriteRequest	 = true;		//ÊòØÂê¶ËÆ∞ÂΩïRequest
+	static var _isWriteResponse  = false;		//ÊòØÂê¶ËÆ∞ÂΩïresponse
+	static var _isWriteUrl       = true;		//ÊòØÂê¶ËÆ∞ÂΩïËØ∑Ê±Çurl
+	static var _streamWriter 	 = null; 
+	
+	/////////////////////////Ëá™ÂÆö‰πâÂ≠óÁ¨¶‰∏≤ ///////////////////////////     
             
     public static RulesOption("Hide 304s")
     BindPref("fiddlerscript.rules.Hide304s")
@@ -171,44 +174,87 @@ class Handlers
         }
         UI.actUpdateInspector(true,true);
     }
+		
+	public static function WriteToFile(filePath:String,cookie: String,url:String,body:String){
+		if(!File.Exists(filePath)){
+			var fs= File.Create(filePath);
+			fs.Close();
+		} 
+		//var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite,FileShare.ReadWrite);
+		var sw = new StreamWriter(filePath,true)
+		if(sw == null){return;}
+		sw.WriteLine(cookie);
+		sw.WriteLine(url);
+		sw.WriteLine(body);
+		sw.WriteLine("\r\n");
+		sw.Flush();
+		sw.Close();
+	}
 
     static function OnBeforeRequest(oSession: Session) {
-        // Sample Rule: Color ASPX requests in RED
-        // if (oSession.uriContains(".aspx")) {	oSession["ui-color"] = "red";	}
 
-        // Sample Rule: Flag POSTs to fiddler2.com in italics
-        // if (oSession.HostnameIs("www.fiddler2.com") && oSession.HTTPMethodIs("POST")) {	oSession["ui-italic"] = "yup";	}
-
-        // Sample Rule: Break requests for URLs containing "/sandbox/"
-        // if (oSession.uriContains("/sandbox/")) {
-        //     oSession.oFlags["x-breakrequest"] = "yup";	// Existence of the x-breakrequest flag creates a breakpoint; the "yup" value is unimportant.
-        // }
-
-        // MessageBox.Show("Fiddler OnBeforeRequest hcc----");
-        //Console.WriteLine("hcc----------------------->");
-        //if(oSession.HostnameIs("www.baidu.com")){
-        //  oSession.hostname = "www.sina.com.cn";
-        // }
-        
-        var reCookie = oSession.oRequest.headers["Cookie"];
-        var rehost = oSession.oRequest.host;
-        var reUrl = oSession.url;
-        var reFurl = oSession.fullUrl;
-        
-        // oSession.SaveRequest("C:\\Users\\95\\Desktop\\request.txt",false);
-        
-        //FiddlerObject.playSound("C:\\Users\\95\\AppData\\Local\\Programs\\Fiddler\\LoadScript.wav");        //≤•∑≈…˘“Ù
-        //FiddlerObject.log("hcclog----------------->");
-        //FiddlerObject.alert(rehost);      //µØøÚ
-        if(reCookie.Length > 0){
-            //var str = "Cookie: " + reCookie;
-            //MessageBox.Show(str);
-            //oSession.LoadRequestBodyFromFile("C:\\fidderData\request.txt");
-            //var filepath = "C:\\fidderData\request.txt";
-            //writeFile(filepath,str);
-        }
-        
-        
+		////////////////////by hcc/////////////////////
+	
+		var cookie 		= oSession.oRequest.headers["Cookie"];		
+		var host        = oSession.host;
+		var hostName    = oSession.hostname;
+		var urlstr      = oSession.url;
+		var fullurl     = oSession.fullUrl;
+		var reqBody		= oSession.GetRequestBodyAsString()
+		
+		var filePath    = _filePath;
+		var hostcompare = _hostCompare
+		if(!String.IsNullOrEmpty(reqBody)){
+			FiddlerObject.log("reqBody: " + reqBody);
+		}
+		
+		if(String.IsNullOrEmpty(hostcompare)){
+			if(!String.IsNullOrEmpty(cookie)){
+				//Êí≠ÊîæÂ£∞Èü≥Ôºå‰øùÂ≠òcookies
+				if(File.Exists(_soundPath) && _isWriteRequest){
+					FiddlerObject.playSound(_soundPath);
+				}
+                
+				var alltext = File.ReadAllText(filePath);
+				var __cks = _static_ck + cookie + "";
+				var __url = _static_url + fullurl + "";
+				var __bdy = _static_body + reqBody + "";
+				
+				if(!alltext.Contains(cookie)||!alltext.Contains(fullurl)){
+					if(_isWriteRequest){
+						WriteToFile(filePath,__cks,__url,__bdy);
+					}
+					FiddlerObject.log("\r\nhcc----------->‰∏çÂ≠òÂú®cookieÔºåÂÜôÂÖ•: " + cookie);
+				}else{
+					FiddlerObject.log("\r\nhcc----------->Â≠òÂú®cookie:Ôºå‰∏çÂÜôÂÖ•: " + cookie);
+				}
+			}
+		}else
+		{
+			if(!String.IsNullOrEmpty(cookie) && host == hostcompare){
+				//Êí≠ÊîæÂ£∞Èü≥Ôºå‰øùÂ≠òcookies
+				if(File.Exists(_soundPath) && _isWriteRequest){
+					FiddlerObject.playSound(_soundPath);
+				}
+				var alltext = File.ReadAllText(filePath);
+				var __cks = _static_ck + cookie + "";
+				var __url = _static_url + fullurl + "";
+				var __bdy = _static_body + reqBody + "";
+				
+				var alltext = File.ReadAllText(filePath);
+				if(!alltext.Contains(cookie)||!alltext.Contains(fullurl)){
+					if(_isWriteRequest){
+						WriteToFile(filePath,__cks,__url,__bdy);
+					}
+					FiddlerObject.log("\r\nhcc----------->‰∏çÂ≠òÂú®cookieÔºåÂÜôÂÖ•: " + cookie);
+				}else{
+					FiddlerObject.log("\r\nhcc----------->Â≠òÂú®cookie:Ôºå‰∏çÂÜôÂÖ•: " + cookie);
+				}
+                
+			}
+		}
+  
+        ////////////////////by Á≥ªÁªü/////////////////////
         if ((null != gs_ReplaceToken) && (oSession.url.indexOf(gs_ReplaceToken)>-1)) {   // Case sensitive
             oSession.url = oSession.url.Replace(gs_ReplaceToken, gs_ReplaceTokenWith); 
         }
@@ -315,9 +361,9 @@ class Handlers
     }
 
         /*
-        //ÃÌº”«Î«ÛÕ∑
+        //Ê∑ªÂä†ËØ∑Ê±ÇÂ§¥
         oSession.oRequest["NewHeaderName"] = "New header value"; 
-        //…æ≥˝∑µªÿÕ∑
+        //Âà†Èô§ËøîÂõûÂ§¥
         //oSession.oResponse.headers.Remove("Set-Cookie");   
     */
       
@@ -325,67 +371,63 @@ class Handlers
         if (m_Hide304s && oSession.responseCode == 304) {
             oSession["ui-hide"] = "true";
         }
-        
-        
-        var cookie = oSession.oResponse.headers["Set-Cookie"];
-        //host :wx.vivatech.cn
-        var host        = oSession.host;
-        var hostName    = oSession.hostname;
-        //url:host∫Õ∫Û√Êµƒ±Ìµ•
-        var urlstr      = oSession.url;
-        var fullurl     = oSession.fullUrl;
-        var hostcompare = _hostCompare
-        var len         = cookie.Length;
-        var filePath    = _filePath;
-        
-        
-        if(String.IsNullOrEmpty(hostcompare)){
-            if(!String.IsNullOrEmpty(cookie)){
-                //≤•∑≈…˘“Ù£¨±£¥Êcookies
-                if(File.Exists(_soundPath)){
-                    FiddlerObject.playSound(_soundPath);
-                }
-                if(!File.Exists(filePath)){
-                    File.Create(filePath);
-                }
+		////////////////////by hcc/////////////////////
+		
+		var cookie = oSession.oResponse.headers["Set-Cookie"];
+		var host        = oSession.host;
+		var hostName    = oSession.hostname;
+		var urlstr      = oSession.url;
+		var fullurl     = oSession.fullUrl;
+		var reqBody		= oSession.GetRequestBodyAsString();
+		
+		var hostcompare = _hostCompare
+		var filePath    = _filePath;
+		
+		if(String.IsNullOrEmpty(hostcompare)){
+			if(!String.IsNullOrEmpty(cookie)){
+				//Êí≠ÊîæÂ£∞Èü≥Ôºå‰øùÂ≠òcookies
+				if(File.Exists(_soundPath) && _isWriteResponse){
+					FiddlerObject.playSound(_soundPath);
+				}
+				var alltext = File.ReadAllText(filePath);
+				var __cks 	= _static_ck + cookie + "";
+				var __url 	= _static_url + fullurl + "";
+				var __bdy 	= _static_body + reqBody + "";
+				
+				if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)){
+					if(_isWriteResponse){
+						WriteToFile(filePath,__cks,__url,__bdy);
+					}
+					FiddlerObject.log("\r\nhcc----------->‰∏çÂ≠òÂú®cookieÔºåÂÜôÂÖ•: " + cookie);
+				}else{
+					FiddlerObject.log("\r\nhcc----------->Â≠òÂú®cookie:Ôºå‰∏çÂÜôÂÖ•: " + cookie);
+				}
+			}
+		}else
+		{
+			if(!String.IsNullOrEmpty(cookie) && host == hostcompare){
+				//Êí≠ÊîæÂ£∞Èü≥Ôºå‰øùÂ≠òcookies
+				if(File.Exists(_soundPath)&& _isWriteResponse){
+					FiddlerObject.playSound(_soundPath);
+				}
+				var alltext = File.ReadAllText(filePath);
+				var __cks 	= _static_ck + cookie + "";
+				var __url 	= _static_url + fullurl + "";
+				var __bdy 	= _static_body + reqBody + "";
+				
+				if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)){
+					if(_isWriteResponse){
+						WriteToFile(filePath,__cks,__url,__bdy);
+					}
+					FiddlerObject.log("\r\nhcc----------->‰∏çÂ≠òÂú®cookieÔºåÂÜôÂÖ•: " + cookie);
+				}else{
+					FiddlerObject.log("\r\nhcc----------->Â≠òÂú®cookie:Ôºå‰∏çÂÜôÂÖ•: " + cookie);
+				}
                 
-                var alltext = File.ReadAllText(filePath);
-                if(!alltext.Contains(cookie)){
-                    File.AppendAllText(filePath,_static_ck + cookie+"\r\n");
-                    if(_isWriteUrl){
-                        File.AppendAllText(filePath, _static_url + fullurl+"\r\n");
-                    }
-                    File.AppendAllText(filePath,"\r\n");
-                    FiddlerObject.log("\r\nhcc----------->≤ª¥Ê‘⁄cookie£¨–¥»Î: " + cookie);
-                }else{
-                    FiddlerObject.log("\r\nhcc----------->¥Ê‘⁄cookie:£¨≤ª–¥»Î: " + cookie);
-                }
-            }
-        }else
-        {
-            if(!String.IsNullOrEmpty(cookie) && host == hostcompare){
-                //≤•∑≈…˘“Ù£¨±£¥Êcookies
-                if(File.Exists(_soundPath)){
-                    FiddlerObject.playSound(_soundPath);
-                }
-                if(!File.Exists(filePath)){
-                    File.Create(filePath);
-                }
-                
-                var alltext = File.ReadAllText(filePath);
-                if(!alltext.Contains(cookie)){
-                    File.AppendAllText(filePath,_static_ck + cookie+"\r\n");
-                    if(_isWriteUrl){
-                        File.AppendAllText(filePath, _static_url + fullurl+"\r\n");
-                    }
-                    File.AppendAllText(filePath,"\r\n");
-                    FiddlerObject.log("\r\nhcc----------->≤ª¥Ê‘⁄cookie£¨–¥»Î: " + cookie);
-                }else{
-                    FiddlerObject.log("\r\nhcc----------->¥Ê‘⁄cookie:£¨≤ª–¥»Î: " + cookie);
-                }
-                
-            }
-        }
+			}
+		}    
+        
+    
         /*
             if(!String.IsNullOrEmpty(cookie) && host == hostcompare){
                 if(File.Exists(_soundPath)){
@@ -402,11 +444,11 @@ class Handlers
                             File.AppendAllText(filePath, _static_url + fullurl+"\r\n");
                         }
                         File.AppendAllText(filePath,"\r\n");
-                        FiddlerObject.log("\r\nhcc----------->≤ª¥Ê‘⁄cookie£¨–¥»Î: " + cookie);
+                        FiddlerObject.log("\r\nhcc----------->‰∏çÂ≠òÂú®cookieÔºåÂÜôÂÖ•: " + cookie);
                     
                     }else
                     {
-                        FiddlerObject.log("\r\nhcc----------->¥Ê‘⁄cookie:£¨≤ª–¥»Î: " + cookie);
+                        FiddlerObject.log("\r\nhcc----------->Â≠òÂú®cookie:Ôºå‰∏çÂÜôÂÖ•: " + cookie);
                     }
                 }
                 else
@@ -439,7 +481,6 @@ class Handlers
     static function OnBoot() {
         MessageBox.Show("Fiddler has finished booting");
         System.Diagnostics.Process.Start("iexplore.exe");
-
         UI.ActivateRequestInspector("HEADERS");
         UI.ActivateResponseInspector("HEADERS");
     }
@@ -483,12 +524,13 @@ class Handlers
         // Uncomment to add a global hotkey (Win+G) that invokes the ExecAction method below...
         // UI.RegisterCustomHotkey(HotkeyModifiers.Windows, Keys.G, "screenshot");
         
-        //hcc ¥¥Ω®◊¿√ÊŒƒº˛º–
-        var filePath = _filePath;
-        //var filePath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory); //error
-        if(!File.Exists(filePath)){
-            File.Create(filePath);
-        }
+		////////////////////by hcc/////////////////////
+				
+		var filePath = _filePath;
+		if(!File.Exists(filePath)){
+			var fs = File.Create(_filePath);
+			fs.Close();
+		}
     }
 
     // These static variables are used for simple breakpointing & other QuickExec rules 
@@ -627,3 +669,4 @@ class Handlers
         }
     }
 }
+
