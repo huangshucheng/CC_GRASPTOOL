@@ -64,8 +64,8 @@ namespace CC_GRASPTOOL
             //_dataInfoList.Add(new DataInfo("2", "cookies2--hjfkjdk", "result2", "state2"));
             //_dataReturnList.Add(new DataReturn("1", "return"));
 
-            ui_listview_ck.ItemsSource = _dataInfoList;
-            ui_listview_return.ItemsSource = _dataReturnList;
+            ui_listview_ck.ItemsSource      = _dataInfoList;
+            ui_listview_return.ItemsSource  = _dataReturnList;
         }
         //清除
         private void Button_Click_Clear(object sender, RoutedEventArgs e)
@@ -77,82 +77,113 @@ namespace CC_GRASPTOOL
         //手动请求
         private void Button_Click_HandReq(object sender, RoutedEventArgs e)
         {
-            string tmpweb       = "";
-            string tmpparam     = "";
-            string tmpck        = _cookieHeader;
-            string ckstr        = ui_rtext_ckinput.Text;
-            string urlstr       = ui_rtext_urlinput.Text;
-            string paramstr     = ui_text_paraminput.Text;
-
-            if(!string.IsNullOrEmpty(ckstr)){
-                tmpck = ckstr;
-            }
-
-            if (!string.IsNullOrEmpty(urlstr) && EasyHttpUtils.CheckIsUrlFormat(urlstr)){
-                tmpweb = urlstr;
-            }
-
-            if(!string.IsNullOrEmpty(paramstr)){
-                tmpparam = paramstr;    //TODO  验证请求参数
-            }
-
-            int recount = getReqCount();
-            Console.WriteLine("请求次数：{0}", recount);
-            for (int i = 0; i < recount;++i)
+            try
             {
-                EasyHttp http = EasyHttp.With(tmpweb);
-                if (http == null) return;
-                http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
-                //请求内容表单
-                //http.Data("code", "9405");
-                //添加请求头
-                http.AddHeadersByDic(_reqHeaderDic);   
-                //设置cookie
-                http.SetCookieHeader(tmpck);
-                //请求
-                http.PostForStringAsyc(tmpparam);
-                http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
+                Thread tmpThread = new Thread(new ParameterizedThreadStart(HandReqThread));
+                tmpThread.Start();
             }
-        }
-        //读取配置
-        private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("开始读配置");
-            TxtFileUtil t = new TxtFileUtil();
-            t.readFileToList();
-            t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
-        }
-        //读取配置，写如UI
-        private void addTxtReturn(object sender, DataInfo data)
-        {
-            _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_result, data.ck_state));
+            catch (Exception ex)
+            {
+                Console.WriteLine("threadError:" + ex.Message);
+            }
         }
         //用配置请求
         private void Button_Click_ConfigReq(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("用配置请求...");
-            int recount = getReqCount();
-            for (int ct = 0; ct < recount; ++ct) {
-                for (int i = 0; i < _dataInfoList.Count; ++i)
-                {
-                    var url = _dataInfoList[i].ck_state;
-                    var body = _dataInfoList[i].ck_result;
-                    var cookie = _dataInfoList[i].ck_cookie;
-                    EasyHttp http = EasyHttp.With(url);
-                    if (http == null) return;
-                    http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
-                    //请求内容
-                    //http.Data("code", "9405");
-                    //添加请求头
-                    http.AddHeadersByDic(_reqHeaderDic);
-                    //设置cookie
-                    http.SetCookieHeader(cookie);
-                    //请求
-                    http.PostForStringAsyc(body);   //请求内容放在这里也可
-                    http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
-                }
+            try
+            {
+                Thread tmpThread = new Thread(new ParameterizedThreadStart(ConfReqThread));
+                tmpThread.Start();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine("threadError:" + ex.Message);
+            }
+
         }
+        //读取配置
+        private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
+        {
+            TxtFileUtil t = new TxtFileUtil();
+            t.readFileToList();
+            t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
+        }
+        //手动请求线程
+        private void HandReqThread(object param)
+        {
+             Dispatcher.BeginInvoke((Action)delegate() {
+                 string tmpweb = "";
+                 string tmpparam = "";
+                 string tmpck = _cookieHeader;
+                 string ckstr = ui_rtext_ckinput.Text;
+                 string urlstr = ui_rtext_urlinput.Text;
+                 string paramstr = ui_text_paraminput.Text;
+
+                 if (!string.IsNullOrEmpty(ckstr))
+                 {
+                     tmpck = ckstr;
+                 }
+
+                 if (!string.IsNullOrEmpty(urlstr) && EasyHttpUtils.CheckIsUrlFormat(urlstr))
+                 {
+                     tmpweb = urlstr;
+                 }
+
+                 if (!string.IsNullOrEmpty(paramstr))
+                 {
+                     tmpparam = paramstr;    //TODO  验证请求参数
+                 }
+
+                 int recount = getReqCount();
+                 Console.WriteLine("请求次数：{0}", recount);
+                 for (int i = 0; i < recount; ++i)
+                 {
+                     EasyHttp http = EasyHttp.With(tmpweb);
+                     if (http == null) return;
+                     http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
+                     //请求内容表单
+                     //http.Data("code", "9405");
+                     //添加请求头
+                     http.AddHeadersByDic(_reqHeaderDic);
+                     //设置cookie
+                     http.SetCookieHeader(tmpck);
+                     //请求
+                     http.PostForStringAsyc(tmpparam);
+                     http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
+                 }
+             });
+        }
+        //配置请求线程
+        private void ConfReqThread(object param)
+        {
+
+            Dispatcher.BeginInvoke((Action)delegate() {
+                if (_dataInfoList.Count <= 0) { return; }
+                int recount = getReqCount();
+                for (int ct = 0; ct < recount; ++ct)
+                {
+                    for (int i = 0; i < _dataInfoList.Count; ++i)
+                    {
+                        var url = _dataInfoList[i].ck_url;
+                        var body = _dataInfoList[i].ck_body;
+                        var cookie = _dataInfoList[i].ck_cookie;
+                        EasyHttp http = EasyHttp.With(url);
+                        if (http == null) return;
+                        http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
+                        //请求内容
+                        //http.Data("code", "9405");
+                        //添加请求头
+                        http.AddHeadersByDic(_reqHeaderDic);
+                        //设置cookie
+                        http.SetCookieHeader(cookie);
+                        //请求
+                        http.PostForStringAsyc(body);   //请求内容放在这里也可
+                        http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
+                    }
+                }
+            });
+        }
+
         //请求结果显示到UI
         private void addDataReturn(object sender,DataReturn data)
         {
@@ -166,6 +197,11 @@ namespace CC_GRASPTOOL
             _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));
            
         }
+        //读取配置，写如UI
+        private void addTxtReturn(object sender, DataInfo data)
+        {
+            _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_body, data.ck_url));
+        }
         //控制请求次数
         private int getReqCount()
         {
@@ -175,17 +211,20 @@ namespace CC_GRASPTOOL
             if(string.IsNullOrEmpty(cstr)){
                 return reqcount;            
             }
-            try{
+            try
+            {
                 nstr = int.Parse(cstr);
             }
-            catch (Exception e){
-                Console.WriteLine("error:"+e.Message);
+            catch (Exception e)
+            {
+                Console.WriteLine("error:" + e.Message);
+                return reqcount;
             }
             if(nstr > 0){
                 reqcount = nstr;
             }
-            if (reqcount > 50)
-                reqcount = 50;      //最多请求50次
+            if (reqcount >= 100)
+                reqcount = 100;      //最多请求50次
             return reqcount;
         }
     }

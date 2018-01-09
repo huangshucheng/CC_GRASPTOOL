@@ -302,11 +302,13 @@ namespace CC_GRASPTOOL
           if (string.IsNullOrWhiteSpace(str))
               return str;
           string tmpstr = str;
-          try {
+          try
+          {
               tmpstr = Regex.Unescape(str);
           }
-          catch(Exception e){
-              Console.WriteLine("UnicodeDencode error:{0}",e.Message);
+          catch (Exception e)
+          {
+              Console.WriteLine("UnicodeDencode error:{0}", e.Message);
           }
           return tmpstr;
       }

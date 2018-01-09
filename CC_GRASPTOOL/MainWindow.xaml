@@ -12,8 +12,8 @@
                 <GridView>
                     <GridViewColumn Header="序号" Width="50" DisplayMemberBinding ="{Binding ck_id}"/>
                     <GridViewColumn Header="cookie" Width="250" DisplayMemberBinding ="{Binding ck_cookie}"/>
-                    <GridViewColumn Header="请求参数" Width="150" DisplayMemberBinding ="{Binding ck_result}"/>
-                    <GridViewColumn Header="请求地址" Width="350" DisplayMemberBinding ="{Binding ck_state}"/>
+                    <GridViewColumn Header="请求参数" Width="150" DisplayMemberBinding ="{Binding ck_body}"/>
+                    <GridViewColumn Header="请求地址" Width="310" DisplayMemberBinding ="{Binding ck_url}"/>
                 </GridView>
             </ListView.View>
         </ListView>

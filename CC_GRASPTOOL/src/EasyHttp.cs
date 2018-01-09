@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using System.Windows;
+using System.IO.Compression;
 
 namespace CC_GRASPTOOL
 {
@@ -304,7 +305,12 @@ namespace CC_GRASPTOOL
             HttpWebResponse webResponse = Execute(method);
             this._response = webResponse;
             if (webResponse != null){
-               return webResponse.GetResponseStream();
+                Stream responseStream = _response.GetResponseStream();
+                if (_response.ContentEncoding.ToLower().Contains("gzip"))
+                    responseStream = new GZipStream(responseStream, CompressionMode.Decompress);
+                else if (_response.ContentEncoding.ToLower().Contains("deflate"))
+                    responseStream = new DeflateStream(responseStream, CompressionMode.Decompress);
+                return responseStream;
             }
             return null;
         }
@@ -593,16 +599,21 @@ namespace CC_GRASPTOOL
             timer.Start();
             try {
                 _response = (await request.GetResponseAsync()) as HttpWebResponse;
-               var str = EasyHttpUtils.ReadAllAsString(_response.GetResponseStream(), _responseEncoding);
-               statusCode = _response.StatusCode;
-               _cookieContainer.Add(_response.Cookies);
+                Stream responseStream = _response.GetResponseStream();
+                if (_response.ContentEncoding.ToLower().Contains("gzip"))
+                    responseStream = new GZipStream(responseStream, CompressionMode.Decompress);
+                else if (_response.ContentEncoding.ToLower().Contains("deflate"))
+                    responseStream = new DeflateStream(responseStream, CompressionMode.Decompress);
+
+                var str = EasyHttpUtils.ReadAllAsString(responseStream, _responseEncoding);
+                statusCode = _response.StatusCode;
+                _cookieContainer.Add(_response.Cookies);
                 _response.Close();
                 LogHtml(str);
+
                 if (OnDataReturn != null)
                 {
-
                     OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));
-                   // OnDataReturn.Invoke(this, new DataReturn("0", str));
                 }
             }
             catch (WebException ex)
@@ -615,7 +626,6 @@ namespace CC_GRASPTOOL
                     LogHtml(str);
                     if (OnDataReturn != null)
                     {
-                        //OnDataReturn.Invoke(this, new DataReturn("0", str));
                         OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));
                     }
                 }

@@ -11,15 +11,15 @@ namespace CC_GRASPTOOL
     {
         private string  _ck_id;
         private string  _ck_cookie;
-        private string  _ck_result;
-        private string  _ck_state;
+        private string  _ck_body;
+        private string  _ck_url;
         public event PropertyChangedEventHandler PropertyChanged;
-        public DataInfo(string id, string cookie, string result, string state)
+        public DataInfo(string id, string cookie, string body, string url)
         {
             _ck_id = id;
             _ck_cookie = cookie;
-            _ck_result = result;
-            _ck_state = state;
+            _ck_body = body;
+            _ck_url = url;
         }
         public string ck_id  
         {
@@ -37,20 +37,20 @@ namespace CC_GRASPTOOL
                 PropertyChanged(this, new PropertyChangedEventArgs("ck_cookie"));  
             }  
         }
-        public string ck_result  
+        public string ck_body 
         {
-            get { return _ck_result; }
+            get { return _ck_body; }
             set {
-                _ck_result = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("ck_result")); 
+                _ck_body = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("ck_body")); 
             }  
         }  
-        public string ck_state  
+        public string ck_url  
         {
-            get { return _ck_state; }
-            set { 
-                _ck_state = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("ck_state")); 
+            get { return _ck_url; }
+            set {
+                _ck_url = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("ck_url")); 
             }  
         }
     }

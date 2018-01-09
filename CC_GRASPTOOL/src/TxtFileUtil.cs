@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace CC_GRASPTOOL
 {
@@ -57,7 +58,7 @@ namespace CC_GRASPTOOL
         }
 
         private void paraseTxtString(string txtString)
-        { 
+        {
             if(string.IsNullOrEmpty(txtString)){
                 return;
             }
