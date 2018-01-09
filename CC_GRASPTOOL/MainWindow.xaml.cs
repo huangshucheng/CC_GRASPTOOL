@@ -195,12 +195,15 @@ namespace CC_GRASPTOOL
                 tmpStr = tmpStr.Substring(0, 200);
             }
             _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));
-           
+            ui_listview_return.Items.MoveCurrentToLast();
+            ui_listview_return.ScrollIntoView(ui_listview_return.Items.CurrentItem);
         }
         //读取配置，写如UI
         private void addTxtReturn(object sender, DataInfo data)
         {
             _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_body, data.ck_url));
+            ui_listview_ck.Items.MoveCurrentToLast();
+            ui_listview_ck.ScrollIntoView(ui_listview_ck.Items.CurrentItem);
         }
         //控制请求次数
         private int getReqCount()

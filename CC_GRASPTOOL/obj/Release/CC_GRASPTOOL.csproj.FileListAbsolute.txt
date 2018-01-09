@@ -11,3 +11,16 @@ E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.Properties.Resourc
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.csproj.GenerateResource.Cache
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.exe
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.pdb
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Release\CC_GRASPTOOL.exe.config
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.exe
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.pdb
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Release\CC_GRASPTOOL.exe
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Release\CC_GRASPTOOL.pdb
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.csprojResolveAssemblyReference.cache
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\MainWindow.baml
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\MainWindow.g.cs
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\App.g.cs
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL_MarkupCompile.cache
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.g.resources
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.Properties.Resources.resources
+C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Release\CC_GRASPTOOL.csproj.GenerateResource.Cache

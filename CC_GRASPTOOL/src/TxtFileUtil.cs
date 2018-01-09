@@ -65,7 +65,7 @@ namespace CC_GRASPTOOL
 
             var __tmpstr = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(txtString, string.Empty));
             //Console.WriteLine("去换行:"+ __tmpstr);
-            
+
             string[] sArray = Regex.Split(__tmpstr, "hcc_cookiePath=", RegexOptions.IgnoreCase);
             int i = 0;
             int j = 0;
