@@ -31,8 +31,8 @@ namespace CC_GRASPTOOL
         Dictionary<string, string> _reqHeaderDic = new Dictionary<string, string>();
         ObservableCollection<DataInfo> _dataInfoList = new ObservableCollection<DataInfo>();
         ObservableCollection<DataReturn> _dataReturnList = new ObservableCollection<DataReturn>();
-        string _cookieHeader = string.Empty;
-        int _responseIndex = 0;
+        static string _cookieHeader = string.Empty;
+        static int _responseIndex = 0;
         string _web  = "http://www.baidu.com";
         string _web1 = "http://www.chenkaihua.com";
         string _web2 = "https://wx.vivatech.cn/app/index.php?i=2&c=entry&fromuser=ot7eUuOEL5zSTiEWKEaf7eqeth_s&sign=bb33QB3lZbVmVl1kTc02VlMnNbXgpO0O0OTO0O0OVGlFV0tFYWY3ZXFldGhfcwO0O0OO0O0O&do=compare&m=viva_njfh_4thyears";
@@ -46,9 +46,9 @@ namespace CC_GRASPTOOL
             Console.WriteLine("MainWindow。。。。。。");
            // _reqHeaderDic.Add("Host", "wx.vivatech.cn");              //自动计算，不用添加也没关系 
             //_reqHeaderDic.Add("Origin", "https://wx.vivatech.cn");    //不会自动添加，不用也没关系
-            //_reqHeaderDic.Add("Content-Length", "9");                 //自动计算
+            //_reqHeaderDic.Add("Content-Length", "9");                 //自动计算，不用也没关系
             //Referer :服务端用来验证页面来源，不用添加也没关系
-            //_reqHeaderDic.Add("Referer", "https://wx.vivatech.cn/app/index.php?i=2&c=entry&do=index&m=viva_njfh_4thyears&fromuser=ot7eUuOEL5zSTiEWKEaf7eqeth_s&sign=bb33QB3lZbVmVl1kTc02VlMnNbXgpO0O0OTO0O0OVGlFV0tFYWY3ZXFldGhfcwO0O0OO0O0O");
+            //_reqHeaderDic.Add("Referer", "");
             _reqHeaderDic.Add("Accept", "application/json, text/javascript,text/html,application/xhtml+xml,application/xml, */*; q=0.01");//客户端希望接收到的数据格式
             _reqHeaderDic.Add("Proxy-Connection", "keep-alive");
             _reqHeaderDic.Add("X-Requested-With", "XMLHttpRequest");
@@ -57,21 +57,21 @@ namespace CC_GRASPTOOL
             _reqHeaderDic.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");      //发送的数据格式
             _reqHeaderDic.Add("Connection", "keep-alive");
             _reqHeaderDic.Add("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_3 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/13G34 MicroMessenger/6.6.1 NetType/WIFI Language/zh_CN");
+            
             //设置cookies
             //_cookieHeader = "PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7;";
-            //_cookieHeader = "openid=oYIFj1OeZn_GIyx5QZuuGUh5J7Wc";
-
             //_dataInfoList.Add(new DataInfo("2", "cookies2--hjfkjdk", "result2", "state2"));
             //_dataReturnList.Add(new DataReturn("1", "return"));
 
             ui_listview_ck.ItemsSource      = _dataInfoList;
-            ui_listview_return.ItemsSource  = _dataReturnList;
+            //ui_listview_return.ItemsSource  = _dataReturnList;
         }
         //清除
         private void Button_Click_Clear(object sender, RoutedEventArgs e)
         {
             _dataInfoList.Clear();
             _dataReturnList.Clear();
+            ui_rtext_return.Text = string.Empty;
             _responseIndex = 0;
         }
         //手动请求
@@ -79,12 +79,14 @@ namespace CC_GRASPTOOL
         {
             try
             {
-                Thread tmpThread = new Thread(new ParameterizedThreadStart(HandReqThread));
+                ParameterizedThreadStart ts = new ParameterizedThreadStart(HandReqThread);
+                Thread tmpThread = new Thread(ts);
+                //System.Threading.Thread.Sleep(100);
                 tmpThread.Start();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("threadError:" + ex.Message);
+                Console.WriteLine("Button_Click_HandReqError:" + ex.Message);
             }
         }
         //用配置请求
@@ -92,21 +94,32 @@ namespace CC_GRASPTOOL
         {
             try
             {
-                Thread tmpThread = new Thread(new ParameterizedThreadStart(ConfReqThread));
+                ParameterizedThreadStart ts = new ParameterizedThreadStart(ConfReqThread);
+                Thread tmpThread = new Thread(ts);
+                //System.Threading.Thread.Sleep(100);
                 tmpThread.Start();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("threadError:" + ex.Message);
+                Console.WriteLine("Button_Click_ConfigReqError:" + ex.Message);
             }
 
         }
         //读取配置
         private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
         {
-            TxtFileUtil t = new TxtFileUtil();
-            t.readFileToList();
-            t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
+            try
+            {
+                ParameterizedThreadStart ts = new ParameterizedThreadStart(ReadConfigThread);
+                Thread tmpThread = new Thread(ts);
+                //System.Threading.Thread.Sleep(100);
+                tmpThread.Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Button_Click_ReadConfError:" + ex.Message);
+            }
+            
         }
         //手动请求线程
         private void HandReqThread(object param)
@@ -152,7 +165,21 @@ namespace CC_GRASPTOOL
                      http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
                  }
              });
+             //System.Threading.Thread.Sleep(100);
         }
+
+        //读配置线程
+        private void ReadConfigThread(object sender)
+        {
+            Dispatcher.BeginInvoke((Action)delegate()
+            {
+                TxtFileUtil t = new TxtFileUtil();
+                t.readFileToList();
+                t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
+            });
+            //System.Threading.Thread.Sleep(100);
+        }
+
         //配置请求线程
         private void ConfReqThread(object param)
         {
@@ -182,11 +209,13 @@ namespace CC_GRASPTOOL
                     }
                 }
             });
+            //System.Threading.Thread.Sleep(100);
         }
 
         //请求结果显示到UI
         private void addDataReturn(object sender,DataReturn data)
         {
+            /*
             _responseIndex++;
             //Console.WriteLine("hcc--->{0},{1}" ,data.return_id , data.return_data);
             var tmpStr = data.return_data;
@@ -197,6 +226,19 @@ namespace CC_GRASPTOOL
             _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));
             ui_listview_return.Items.MoveCurrentToLast();
             ui_listview_return.ScrollIntoView(ui_listview_return.Items.CurrentItem);
+             */
+            
+            if(data == null){
+                return;
+            }
+            _responseIndex++;
+            var tmpStr ="[" + _responseIndex + "]," +  "[" + DateTime.Now.ToLongTimeString().ToString() + "]:  " + data.return_data;
+            if (tmpStr.Length > 200)
+            {
+                tmpStr = tmpStr.Substring(0, 200);
+            }
+            ui_rtext_return.AppendText(tmpStr + "\r\n");
+            ui_rtext_return.ScrollToEnd();
         }
         //读取配置，写如UI
         private void addTxtReturn(object sender, DataInfo data)
@@ -227,7 +269,7 @@ namespace CC_GRASPTOOL
                 reqcount = nstr;
             }
             if (reqcount >= 100)
-                reqcount = 100;      //最多请求50次
+                reqcount = 100;      //最多请求100次
             return reqcount;
         }
     }

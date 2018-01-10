@@ -1,7 +1,6 @@
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.exe.config
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.exe
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.pdb
-E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.csprojResolveAssemblyReference.cache
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\MainWindow.baml
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\MainWindow.g.cs
 E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\App.g.cs
@@ -24,3 +23,4 @@ C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.csproj.G
 C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.exe
 C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\bin\Debug\CC_GRASPTOOL.pdb
 C:\Users\95\Desktop\FD\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.csprojResolveAssemblyReference.cache
+E:\LuaFile\CC_GRASPTOOL\CC_GRASPTOOL\obj\Debug\CC_GRASPTOOL.csprojResolveAssemblyReference.cache

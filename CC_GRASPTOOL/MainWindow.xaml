@@ -1,48 +1,54 @@
 ﻿<Window x:Class="CC_GRASPTOOL.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="辅助byhcc" Height="830.5" Width="800">
-    <Grid RenderTransformOrigin="0.5,0.5">
-        <Button Content="清空数据" HorizontalAlignment="Left" Margin="69,710,0,0" VerticalAlignment="Top" Width="114" Click="Button_Click_Clear" Height="42"/>
-        <Button Content="手动请求" HorizontalAlignment="Left" Margin="198,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_HandReq" Height="42"/>
-        <Button Content="开始读配置" HorizontalAlignment="Left" Margin="435,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ReadConf" Height="42"/>
-        <Button Content="用配置请求" HorizontalAlignment="Left" Margin="559,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ConfigReq" Height="42"/>
-        <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="249" VerticalAlignment="Top" Width="782" AllowDrop="True" >
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="序号" Width="50" DisplayMemberBinding ="{Binding ck_id}"/>
-                    <GridViewColumn Header="cookie" Width="250" DisplayMemberBinding ="{Binding ck_cookie}"/>
-                    <GridViewColumn Header="请求参数" Width="150" DisplayMemberBinding ="{Binding ck_body}"/>
-                    <GridViewColumn Header="请求地址" Width="310" DisplayMemberBinding ="{Binding ck_url}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <ListView x:Name="ui_listview_return" HorizontalAlignment="Left" Height="229" VerticalAlignment="Top" Width="782" Margin="0,254,0,0" >
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="id" Width="50" DisplayMemberBinding ="{Binding return_id}"/>
-                    <GridViewColumn Header="返回数据" Width="690" DisplayMemberBinding ="{Binding return_data}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <TextBox Name="ui_rtext_ckinput" 
-                 HorizontalAlignment="Left" 
-                 Height="60" Margin="69,554,0,0" 
-                 VerticalAlignment="Top" 
-                 Width="697"
-                 AcceptsReturn="True"
-                 Text="">
-        </TextBox>
-        <TextBox x:Name="ui_rtext_urlinput" 
+        Title="辅助byhcc" Height="830.5" Width="800" Background="Snow">
+    <Viewbox>
+        <Grid RenderTransformOrigin="0.5,0.5">
+            <Button Content="清空数据" HorizontalAlignment="Left" Margin="69,710,0,0" VerticalAlignment="Top" Width="114" Click="Button_Click_Clear" Height="42"/>
+            <Button Content="手动请求" HorizontalAlignment="Left" Margin="198,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_HandReq" Height="42"/>
+            <Button Content="开始读配置" HorizontalAlignment="Left" Margin="435,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ReadConf" Height="42"/>
+            <Button Content="用配置请求" HorizontalAlignment="Left" Margin="559,710,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ConfigReq" Height="42"/>
+            <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="249" VerticalAlignment="Top" AllowDrop="True" Width="750" Margin="6,-12,0,0" >
+                <ListView.View>
+                    <GridView >
+                        <GridViewColumn Header="序号" Width="50" DisplayMemberBinding ="{Binding ck_id}"/>
+                        <GridViewColumn Header="cookie" Width="250" DisplayMemberBinding ="{Binding ck_cookie}"/>
+                        <GridViewColumn Header="请求参数" Width="150" DisplayMemberBinding ="{Binding ck_body}"/>
+                        <GridViewColumn Header="请求地址" Width="310" DisplayMemberBinding ="{Binding ck_url}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <TextBox Name="ui_rtext_return" 
+                HorizontalAlignment="Left" 
+                Height="218" 
+                Width="750"
+                Margin="6,242,0,0" 
+                VerticalAlignment="Top" 
+                AcceptsReturn="True"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Auto"
+                 IsReadOnly="True"/>
+
+            <TextBox Name="ui_rtext_ckinput" 
+                HorizontalAlignment="Left" 
+                Height="60" 
+                Width="697"
+                Margin="69,552,0,0" 
+                VerticalAlignment="Top" 
+                AcceptsReturn="True"
+                Text="">
+            </TextBox>
+            <TextBox x:Name="ui_rtext_urlinput" 
                  HorizontalAlignment="Left" 
                  Height="60" 
-                 Margin="69,489,0,0" 
-                 VerticalAlignment="Top" 
                  Width="697"
+                 Margin="69,481,0,0" 
+                 VerticalAlignment="Top" 
                  AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto"
                  Text="">
-        </TextBox>
-        <TextBox Name="ui_text_numinput" 
+            </TextBox>
+            <TextBox Name="ui_text_numinput" 
                  HorizontalAlignment="Left" 
                  Height="29" Margin="69,620,0,0" 
                  TextWrapping="Wrap" 
@@ -50,12 +56,12 @@
                  Width="63"
                  AcceptsReturn="True"
                  Text="1" />
-        <Label Content="url:" HorizontalAlignment="Left" Margin="24,508,0,0" VerticalAlignment="Top"/>
-        <Label Content="cookie:" HorizontalAlignment="Left" Margin="10,572,0,0" VerticalAlignment="Top"/>
-        <Label Content="请求次数:" HorizontalAlignment="Left" Margin="3,620,0,0" VerticalAlignment="Top"/>
-        <Label Content="请求参数:" HorizontalAlignment="Left" Margin="179,624,0,0" VerticalAlignment="Top"/>
-        <Label Content="参数用&amp;连接,例: code=1020&amp;num=1235" HorizontalAlignment="Left" Margin="252,678,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="ui_text_paraminput" 
+            <Label Content="url:" HorizontalAlignment="Left" Margin="24,508,0,0" VerticalAlignment="Top"/>
+            <Label Content="cookie:" HorizontalAlignment="Left" Margin="10,572,0,0" VerticalAlignment="Top"/>
+            <Label Content="请求次数:" HorizontalAlignment="Left" Margin="3,620,0,0" VerticalAlignment="Top"/>
+            <Label Content="请求参数:" HorizontalAlignment="Left" Margin="179,624,0,0" VerticalAlignment="Top"/>
+            <Label Content="参数用&amp;连接,例: code=1020&amp;num=1235" HorizontalAlignment="Left" Margin="252,678,0,0" VerticalAlignment="Top"/>
+            <TextBox x:Name="ui_text_paraminput" 
         	HorizontalAlignment="Left" 
         	Height="53" Margin="252,620,0,0" 
         	TextWrapping="Wrap" 
@@ -63,5 +69,6 @@
         	Width="514"
             AcceptsReturn="True"
         	Text="" />
-    </Grid>
+        </Grid>
+    </Viewbox>
 </Window>
