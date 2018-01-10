@@ -251,15 +251,16 @@ namespace CC_GRASPTOOL
                 cookie.Value = value;
                 _cookieContainer.Add(new Uri(_baseUrl), cookie);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine("添加Cookie出错," + e.Message);
             }
             return this;
         }
         /// 设置请求的Cookie，例如:<c>a=avlue;c=cvalue</c>
         public EasyHttp SetCookieHeader(string cookieHeader)
         {
-            Console.WriteLine("\n请求cookies: ");
+            //Console.WriteLine("\n请求cookies: ");
             if (string.IsNullOrEmpty(cookieHeader)) return this;
             var substr = cookieHeader.Split(';');
             foreach (string str in substr)
@@ -280,7 +281,7 @@ namespace CC_GRASPTOOL
                             toLowerKey != "HttpOnly")
                         {
                             Cookie(key,value);
-                            Console.WriteLine("cookie:" + key + " : " + value);
+                            //Console.WriteLine("cookie:" + key + " : " + value);
                         }
                     }
                 }

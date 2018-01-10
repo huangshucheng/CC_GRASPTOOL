@@ -15,24 +15,20 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Threading;
 using System.Collections.ObjectModel;
-
-//using Fidder;
-
+using System.Windows.Threading;
 
 namespace CC_GRASPTOOL
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
-    /// //Window mainwin = Application.Current.MainWindow;  //获取主窗口
     public partial class MainWindow : Window
     {
-        Dictionary<string, string> _cooDic = new Dictionary<string, string>();
-        Dictionary<string, string> _reqHeaderDic = new Dictionary<string, string>();
-        ObservableCollection<DataInfo> _dataInfoList = new ObservableCollection<DataInfo>();
+        Dictionary<string, string> _cooDic          = new Dictionary<string, string>();
+        Dictionary<string, string> _reqHeaderDic    = new Dictionary<string, string>();
+        ObservableCollection<DataInfo> _dataInfoList    = new ObservableCollection<DataInfo>();
         ObservableCollection<DataReturn> _dataReturnList = new ObservableCollection<DataReturn>();
-        static string _cookieHeader = string.Empty;
-        static int _responseIndex = 0;
+        private enum ReqMethod { GET, POST };
+        private ReqMethod _reqMethod    = ReqMethod.POST;
+        static string _cookieHeader     = string.Empty;
+        static int _responseIndex       = 0;
         string _web  = "http://www.baidu.com";
         string _web1 = "http://www.chenkaihua.com";
         string _web2 = "https://wx.vivatech.cn/app/index.php?i=2&c=entry&fromuser=ot7eUuOEL5zSTiEWKEaf7eqeth_s&sign=bb33QB3lZbVmVl1kTc02VlMnNbXgpO0O0OTO0O0OVGlFV0tFYWY3ZXFldGhfcwO0O0OO0O0O&do=compare&m=viva_njfh_4thyears";
@@ -43,7 +39,6 @@ namespace CC_GRASPTOOL
         public MainWindow()
         {
             InitializeComponent();
-            Console.WriteLine("MainWindow。。。。。。");
            // _reqHeaderDic.Add("Host", "wx.vivatech.cn");              //自动计算，不用添加也没关系 
             //_reqHeaderDic.Add("Origin", "https://wx.vivatech.cn");    //不会自动添加，不用也没关系
             //_reqHeaderDic.Add("Content-Length", "9");                 //自动计算，不用也没关系
@@ -62,9 +57,7 @@ namespace CC_GRASPTOOL
             //_cookieHeader = "PHPSESSID=6ec48f3714a2f2e62babbce694cfc3b7;";
             //_dataInfoList.Add(new DataInfo("2", "cookies2--hjfkjdk", "result2", "state2"));
             //_dataReturnList.Add(new DataReturn("1", "return"));
-
-            ui_listview_ck.ItemsSource      = _dataInfoList;
-            //ui_listview_return.ItemsSource  = _dataReturnList;
+            ui_listview_ck.ItemsSource  = _dataInfoList;
         }
         //清除
         private void Button_Click_Clear(object sender, RoutedEventArgs e)
@@ -81,7 +74,6 @@ namespace CC_GRASPTOOL
             {
                 ParameterizedThreadStart ts = new ParameterizedThreadStart(HandReqThread);
                 Thread tmpThread = new Thread(ts);
-                //System.Threading.Thread.Sleep(100);
                 tmpThread.Start();
             }
             catch (Exception ex)
@@ -96,14 +88,12 @@ namespace CC_GRASPTOOL
             {
                 ParameterizedThreadStart ts = new ParameterizedThreadStart(ConfReqThread);
                 Thread tmpThread = new Thread(ts);
-                //System.Threading.Thread.Sleep(100);
                 tmpThread.Start();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Button_Click_ConfigReqError:" + ex.Message);
             }
-
         }
         //读取配置
         private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
@@ -112,7 +102,6 @@ namespace CC_GRASPTOOL
             {
                 ParameterizedThreadStart ts = new ParameterizedThreadStart(ReadConfigThread);
                 Thread tmpThread = new Thread(ts);
-                //System.Threading.Thread.Sleep(100);
                 tmpThread.Start();
             }
             catch (Exception ex)
@@ -124,7 +113,8 @@ namespace CC_GRASPTOOL
         //手动请求线程
         private void HandReqThread(object param)
         {
-             Dispatcher.BeginInvoke((Action)delegate() {
+            ui_rtext_return.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
+            {
                  string tmpweb = "";
                  string tmpparam = "";
                  string tmpck = _cookieHeader;
@@ -161,30 +151,68 @@ namespace CC_GRASPTOOL
                      //设置cookie
                      http.SetCookieHeader(tmpck);
                      //请求
-                     http.PostForStringAsyc(tmpparam);
+                     if (_reqMethod == ReqMethod.POST)
+                     {
+                         http.PostForStringAsyc(tmpparam); //请求内容放在这里也可
+                     }
+                     else
+                     {
+                         http.GetForStringAsyc();
+                     }
                      http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
                  }
-             });
-             //System.Threading.Thread.Sleep(100);
+             }));
         }
 
         //读配置线程
         private void ReadConfigThread(object sender)
         {
+            /*
+            this.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                TxtFileUtil t = new TxtFileUtil();
+                t.readFileToList();
+                t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
+            }));
+             * */
+            /*
             Dispatcher.BeginInvoke((Action)delegate()
             {
                 TxtFileUtil t = new TxtFileUtil();
                 t.readFileToList();
                 t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
-            });
-            //System.Threading.Thread.Sleep(100);
+            },DispatcherPriority.Background);
+            */
+            ui_listview_ck.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => {
+                TxtFileUtil t = new TxtFileUtil();
+                t.readFileToList();
+                t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
+            }));
         }
 
         //配置请求线程
         private void ConfReqThread(object param)
         {
-
-            Dispatcher.BeginInvoke((Action)delegate() {
+            //这么做，不会阻塞
+            /*
+            ui_rtext_return.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => {
+                for (int i = 0; i < 100000; i++)
+                {
+                    _responseIndex++;
+                    var tmpStr = "[" + _responseIndex + "]," + "[" + DateTime.Now.ToLongTimeString().ToString() + "]:  ";
+                    if (tmpStr.Length > 200)
+                    {
+                        tmpStr = tmpStr.Substring(0, 200);
+                    }
+                    ui_rtext_return.AppendText(tmpStr + "\r\n");
+                    ui_rtext_return.ScrollToEnd();
+                    UIHelper.DoEvents();
+                }
+            }));
+             * */
+            //这么做，会阻塞 ？？？？？？？ TODO
+            ui_rtext_return.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
+            {
                 if (_dataInfoList.Count <= 0) { return; }
                 int recount = getReqCount();
                 for (int ct = 0; ct < recount; ++ct)
@@ -204,30 +232,24 @@ namespace CC_GRASPTOOL
                         //设置cookie
                         http.SetCookieHeader(cookie);
                         //请求
-                        http.PostForStringAsyc(body);   //请求内容放在这里也可
+                        if (_reqMethod == ReqMethod.POST)
+                        {
+                            http.PostForStringAsyc(body); //请求内容放在这里也可
+                        }
+                        else
+                        {
+                            http.GetForStringAsyc();
+                        }
                         http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
                     }
                 }
-            });
-            //System.Threading.Thread.Sleep(100);
+            }
+            ));
         }
 
         //请求结果显示到UI
         private void addDataReturn(object sender,DataReturn data)
         {
-            /*
-            _responseIndex++;
-            //Console.WriteLine("hcc--->{0},{1}" ,data.return_id , data.return_data);
-            var tmpStr = data.return_data;
-            if (tmpStr.Length > 200)
-            {
-                tmpStr = tmpStr.Substring(0, 200);
-            }
-            _dataReturnList.Add(new DataReturn(_responseIndex.ToString(),tmpStr));
-            ui_listview_return.Items.MoveCurrentToLast();
-            ui_listview_return.ScrollIntoView(ui_listview_return.Items.CurrentItem);
-             */
-            
             if(data == null){
                 return;
             }
@@ -239,6 +261,7 @@ namespace CC_GRASPTOOL
             }
             ui_rtext_return.AppendText(tmpStr + "\r\n");
             ui_rtext_return.ScrollToEnd();
+            UIHelper.DoEvents();
         }
         //读取配置，写如UI
         private void addTxtReturn(object sender, DataInfo data)
@@ -246,6 +269,7 @@ namespace CC_GRASPTOOL
             _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_body, data.ck_url));
             ui_listview_ck.Items.MoveCurrentToLast();
             ui_listview_ck.ScrollIntoView(ui_listview_ck.Items.CurrentItem);
+            UIHelper.DoEvents();
         }
         //控制请求次数
         private int getReqCount()
@@ -271,6 +295,21 @@ namespace CC_GRASPTOOL
             if (reqcount >= 100)
                 reqcount = 100;      //最多请求100次
             return reqcount;
+        }
+
+        public void onUireqtypeSelChenged(object sender, SelectionChangedEventArgs e)
+        {
+            string selectedContent = ((ComboBoxItem)ui_req_type.SelectedItem).Content.ToString();
+            if (selectedContent == "POST")
+            {
+                Console.WriteLine("POST");
+                _reqMethod = ReqMethod.POST;
+            }
+            if (selectedContent == "GET")
+            {
+                Console.WriteLine("GET");
+                _reqMethod = ReqMethod.GET;
+            }
         }
     }
 }
