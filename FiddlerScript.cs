@@ -220,7 +220,10 @@ class Handlers
         var hostName    = oSession.hostname;
         var urlstr      = oSession.url;
         var fullurl     = oSession.fullUrl;
-        var reqBody		= oSession.GetRequestBodyAsString()
+        var reqBody		= oSession.GetRequestBodyAsString();
+        var reqEncoding = oSession.GetRequestBodyEncoding();
+        
+        FiddlerObject.log("hcc----------->请求编码格式:" + reqEncoding.ToString());
 		
         var filePath    = _filePath;
         var hostcompare = _hostCompare
@@ -416,6 +419,8 @@ class Handlers
         var urlstr      = oSession.url;
         var fullurl     = oSession.fullUrl;
         var reqBody		= oSession.GetResponseBodyAsString();
+        var resEncoding = oSession.GetResponseBodyEncoding();
+        FiddlerObject.log("hcc----------->返回编码格式:" + resEncoding.ToString());
 		
         var hostcompare = _hostCompare
         var filePath    = _filePath;
