@@ -22,9 +22,9 @@ namespace CC_GRASPTOOL
 {
     public partial class MainWindow : Window
     {
-        Dictionary<string, string> _cooDic          = new Dictionary<string, string>();
-        Dictionary<string, string> _reqHeaderDic    = new Dictionary<string, string>();
-        ObservableCollection<DataInfo> _dataInfoList    = new ObservableCollection<DataInfo>();
+        Dictionary<string, string> _cooDic               = new Dictionary<string, string>();
+        Dictionary<string, string> _reqHeaderDic         = new Dictionary<string, string>();
+        ObservableCollection<DataInfo> _dataInfoList     = new ObservableCollection<DataInfo>();
         ObservableCollection<DataReturn> _dataReturnList = new ObservableCollection<DataReturn>();
         BackgroundWorker _bgMeet = new BackgroundWorker();
         private enum ReqMethod { GET, POST };
@@ -130,15 +130,7 @@ namespace CC_GRASPTOOL
                 return;
             }
             _doThingStr = this._readConfStr;
-            /*
-            this.Dispatcher.Invoke(new Action(() =>
-            {
-                TxtFileUtil t = new TxtFileUtil();
-                t.readFileToList();
-                t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
-            }));
-            t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
-            */
+           
             TxtFileUtil t = new TxtFileUtil();
             var list = t.readFileToList();
             for (int i = 0; i < list.Count; i++)
@@ -160,9 +152,8 @@ namespace CC_GRASPTOOL
                     ui_listview_ck.Items.MoveCurrentToLast();
                     ui_listview_ck.ScrollIntoView(ui_listview_ck.Items.CurrentItem);
                 }
-                //Console.WriteLine("读取配置。。。。。。。。。。。。。");
             }else if(_doThingStr.Equals(this._handReqStr)){
-                Console.WriteLine("手动请求。。。。。。。。。。");
+                //Console.WriteLine("手动请求。。。。。。。。。。");
                 string info = (string)e.UserState;
                 if (string.IsNullOrEmpty(info)){
                     info = "返回空";
@@ -174,7 +165,7 @@ namespace CC_GRASPTOOL
                 ui_rtext_return.AppendText(tmpStr + "\r\n");
                 ui_rtext_return.ScrollToEnd();
             }else if(_doThingStr.Equals(this._confReqStr)){
-                Console.WriteLine("配置请求。。。。。。。。。。。");
+                //Console.WriteLine("配置请求。。。。。。。。。。。");
                 string info = (string)e.UserState;
                 if(string.IsNullOrEmpty(info)){
                     info = "返回空";
@@ -189,7 +180,7 @@ namespace CC_GRASPTOOL
         }
         void bgMeet_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            Console.WriteLine("完成。。。");
+           // Console.WriteLine("完成。。。");
         }
         private void bgMeetDo_ConfReq(object sender, DoWorkEventArgs e)
         {
