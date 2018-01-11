@@ -16,6 +16,7 @@ using System.IO;
 using System.Threading;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace CC_GRASPTOOL
 {
@@ -25,10 +26,23 @@ namespace CC_GRASPTOOL
         Dictionary<string, string> _reqHeaderDic    = new Dictionary<string, string>();
         ObservableCollection<DataInfo> _dataInfoList    = new ObservableCollection<DataInfo>();
         ObservableCollection<DataReturn> _dataReturnList = new ObservableCollection<DataReturn>();
+        BackgroundWorker _bgMeet = new BackgroundWorker();
         private enum ReqMethod { GET, POST };
         private ReqMethod _reqMethod    = ReqMethod.POST;
         static string _cookieHeader     = string.Empty;
         static int _responseIndex       = 0;
+
+        string _confReqStr  = "confReqStr";
+        string _readConfStr = "readConfStr";
+        string _handReqStr  = "handReqStr";
+        string _doThingStr  = string.Empty;
+
+        string _reqNumStr       = string.Empty;
+        string _reqBodyStr      = string.Empty;
+        string _reqUrlAddStr    = string.Empty;
+        string _reqUrlSourceStr = string.Empty;
+        string _reqCookieStr    = string.Empty;
+
         string _web  = "http://www.baidu.com";
         string _web1 = "http://www.chenkaihua.com";
         string _web2 = "https://wx.vivatech.cn/app/index.php?i=2&c=entry&fromuser=ot7eUuOEL5zSTiEWKEaf7eqeth_s&sign=bb33QB3lZbVmVl1kTc02VlMnNbXgpO0O0OTO0O0OVGlFV0tFYWY3ZXFldGhfcwO0O0OO0O0O&do=compare&m=viva_njfh_4thyears";
@@ -39,6 +53,7 @@ namespace CC_GRASPTOOL
         public MainWindow()
         {
             InitializeComponent();
+            InitBackGroundWorker();
            // _reqHeaderDic.Add("Host", "wx.vivatech.cn");              //自动计算，不用添加也没关系 
             //_reqHeaderDic.Add("Origin", "https://wx.vivatech.cn");    //不会自动添加，不用也没关系
             //_reqHeaderDic.Add("Content-Length", "9");                 //自动计算，不用也没关系
@@ -59,6 +74,18 @@ namespace CC_GRASPTOOL
             //_dataReturnList.Add(new DataReturn("1", "return"));
             ui_listview_ck.ItemsSource  = _dataInfoList;
         }
+
+        private void InitBackGroundWorker()
+        {
+            _bgMeet = new BackgroundWorker();
+            _bgMeet.WorkerReportsProgress = true;
+            _bgMeet.WorkerSupportsCancellation = true;
+            _bgMeet.DoWork += new DoWorkEventHandler(bgMeetDo_ReadConf);
+            _bgMeet.DoWork += new DoWorkEventHandler(bgMeetDo_ConfReq);
+            _bgMeet.DoWork += new DoWorkEventHandler(bgMeetDo_handReq);
+            _bgMeet.ProgressChanged += new ProgressChangedEventHandler(bgMeet_ProgressChanged);  //更新UI
+            _bgMeet.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgMeet_RunWorkerCompleted); //更新UI
+        }
         //清除
         private void Button_Click_Clear(object sender, RoutedEventArgs e)
         {
@@ -70,183 +97,220 @@ namespace CC_GRASPTOOL
         //手动请求
         private void Button_Click_HandReq(object sender, RoutedEventArgs e)
         {
-            try
+            if (_bgMeet.IsBusy)
             {
-                ParameterizedThreadStart ts = new ParameterizedThreadStart(HandReqThread);
-                Thread tmpThread = new Thread(ts);
-                tmpThread.Start();
+                return;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Button_Click_HandReqError:" + ex.Message);
-            }
+            _bgMeet.RunWorkerAsync(_handReqStr);
         }
         //用配置请求
         private void Button_Click_ConfigReq(object sender, RoutedEventArgs e)
         {
-            try
+            if (_bgMeet.IsBusy)
             {
-                ParameterizedThreadStart ts = new ParameterizedThreadStart(ConfReqThread);
-                Thread tmpThread = new Thread(ts);
-                tmpThread.Start();
+                return;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Button_Click_ConfigReqError:" + ex.Message);
-            }
+            _bgMeet.RunWorkerAsync(_confReqStr);
         }
         //读取配置
         private void Button_Click_ReadConf(object sender, RoutedEventArgs e)
         {
-            try
+            if (_bgMeet.IsBusy)
             {
-                ParameterizedThreadStart ts = new ParameterizedThreadStart(ReadConfigThread);
-                Thread tmpThread = new Thread(ts);
-                tmpThread.Start();
+                return;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Button_Click_ReadConfError:" + ex.Message);
-            }
+            _bgMeet.RunWorkerAsync(_readConfStr);
             
         }
-        //手动请求线程
-        private void HandReqThread(object param)
-        {
-            ui_rtext_return.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
-            {
-                 string tmpweb = "";
-                 string tmpparam = "";
-                 string tmpck = _cookieHeader;
-                 string ckstr = ui_rtext_ckinput.Text;
-                 string urlstr = ui_rtext_urlinput.Text;
-                 string paramstr = ui_text_paraminput.Text;
-
-                 if (!string.IsNullOrEmpty(ckstr))
-                 {
-                     tmpck = ckstr;
-                 }
-
-                 if (!string.IsNullOrEmpty(urlstr) && EasyHttpUtils.CheckIsUrlFormat(urlstr))
-                 {
-                     tmpweb = urlstr;
-                 }
-
-                 if (!string.IsNullOrEmpty(paramstr))
-                 {
-                     tmpparam = paramstr;    //TODO  验证请求参数
-                 }
-
-                 int recount = getReqCount();
-                 Console.WriteLine("请求次数：{0}", recount);
-                 for (int i = 0; i < recount; ++i)
-                 {
-                     EasyHttp http = EasyHttp.With(tmpweb);
-                     if (http == null) return;
-                     http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
-                     //请求内容表单
-                     //http.Data("code", "9405");
-                     //添加请求头
-                     http.AddHeadersByDic(_reqHeaderDic);
-                     //设置cookie
-                     http.SetCookieHeader(tmpck);
-                     //请求
-                     if (_reqMethod == ReqMethod.POST)
-                     {
-                         http.PostForStringAsyc(tmpparam); //请求内容放在这里也可
-                     }
-                     else
-                     {
-                         http.GetForStringAsyc();
-                     }
-                     http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
-                 }
-             }));
-        }
-
         //读配置线程
-        private void ReadConfigThread(object sender)
+        private void bgMeetDo_ReadConf(object sender, DoWorkEventArgs e)
         {
+            if (!e.Argument.Equals(_readConfStr)){
+                Console.WriteLine("is busy----------------------->bgMeetDo_ReadConf");
+                return;
+            }
+            _doThingStr = this._readConfStr;
             /*
-            this.Dispatcher.BeginInvoke(new Action(() =>
+            this.Dispatcher.Invoke(new Action(() =>
             {
                 TxtFileUtil t = new TxtFileUtil();
                 t.readFileToList();
                 t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
             }));
-             * */
-            /*
-            Dispatcher.BeginInvoke((Action)delegate()
-            {
-                TxtFileUtil t = new TxtFileUtil();
-                t.readFileToList();
-                t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
-            },DispatcherPriority.Background);
+            t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
             */
-            ui_listview_ck.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => {
-                TxtFileUtil t = new TxtFileUtil();
-                t.readFileToList();
-                t.OnTxtReturn += new TxtFileUtil.TxtReturnHandler(addTxtReturn);
-            }));
-        }
-
-        //配置请求线程
-        private void ConfReqThread(object param)
-        {
-            //这么做，不会阻塞
-            /*
-            ui_rtext_return.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() => {
-                for (int i = 0; i < 100000; i++)
-                {
-                    _responseIndex++;
-                    var tmpStr = "[" + _responseIndex + "]," + "[" + DateTime.Now.ToLongTimeString().ToString() + "]:  ";
-                    if (tmpStr.Length > 200)
-                    {
-                        tmpStr = tmpStr.Substring(0, 200);
-                    }
-                    ui_rtext_return.AppendText(tmpStr + "\r\n");
-                    ui_rtext_return.ScrollToEnd();
-                    UIHelper.DoEvents();
-                }
-            }));
-             * */
-            //这么做，会阻塞 ？？？？？？？ TODO
-            ui_rtext_return.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
+            TxtFileUtil t = new TxtFileUtil();
+            var list = t.readFileToList();
+            for (int i = 0; i < list.Count; i++)
             {
-                if (_dataInfoList.Count <= 0) { return; }
-                int recount = getReqCount();
-                for (int ct = 0; ct < recount; ++ct)
+                _bgMeet.ReportProgress(i, list[i]);
+            }
+        }
+        private void bgMeet_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //百分比，数据
+            //Console.WriteLine("进度:" + e.ProgressPercentage.ToString());
+            //Console.WriteLine("进度:" + e.ProgressPercentage.ToString() + "   msg:" + e.UserState.ToString());
+            //Console.WriteLine("id: " + id + " ,ck: " + cookie + "  ,body: " + body + "  ,url: " + url);
+            if (_doThingStr.Equals(this._readConfStr))
+            {
+                DataInfo info = (DataInfo)e.UserState;
+                if(info != null){
+                    _dataInfoList.Add(info);
+                    ui_listview_ck.Items.MoveCurrentToLast();
+                    ui_listview_ck.ScrollIntoView(ui_listview_ck.Items.CurrentItem);
+                }
+                //Console.WriteLine("读取配置。。。。。。。。。。。。。");
+            }else if(_doThingStr.Equals(this._handReqStr)){
+                Console.WriteLine("手动请求。。。。。。。。。。");
+                string info = (string)e.UserState;
+                if (string.IsNullOrEmpty(info)){
+                    info = "返回空";
+                }
+                var tmpStr = "[" + e.ProgressPercentage.ToString() + "]," + "[" + DateTime.Now.ToLongTimeString().ToString() + "]:  " + info;
+                if (tmpStr.Length > 200){
+                    tmpStr = tmpStr.Substring(0, 200);
+                }
+                ui_rtext_return.AppendText(tmpStr + "\r\n");
+                ui_rtext_return.ScrollToEnd();
+            }else if(_doThingStr.Equals(this._confReqStr)){
+                Console.WriteLine("配置请求。。。。。。。。。。。");
+                string info = (string)e.UserState;
+                if(string.IsNullOrEmpty(info)){
+                    info = "返回空";
+                }
+                var tmpStr = "[" + e.ProgressPercentage.ToString() + "]," + "[" + DateTime.Now.ToLongTimeString().ToString() + "]:  " + info;
+                if (tmpStr.Length > 200){
+                    tmpStr = tmpStr.Substring(0, 200);
+                }
+                ui_rtext_return.AppendText(tmpStr + "\r\n");
+                ui_rtext_return.ScrollToEnd();
+            }
+        }
+        void bgMeet_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Console.WriteLine("完成。。。");
+        }
+        private void bgMeetDo_ConfReq(object sender, DoWorkEventArgs e)
+        {
+            if(!e.Argument.Equals(_confReqStr)){
+                Console.WriteLine("is busy------------->bgMeetDo_ConfReq");
+                return;
+            }
+            _doThingStr = this._confReqStr;
+            if (_dataInfoList.Count <= 0) { return; }
+            int recount = getReqCount();
+            int allCount = 0;
+            for (int ct = 0; ct < recount; ++ct)
+            {
+                for (int i = 0; i < _dataInfoList.Count; ++i)
                 {
-                    for (int i = 0; i < _dataInfoList.Count; ++i)
-                    {
-                        var url = _dataInfoList[i].ck_url;
-                        var body = _dataInfoList[i].ck_body;
-                        var cookie = _dataInfoList[i].ck_cookie;
-                        EasyHttp http = EasyHttp.With(url);
-                        if (http == null) return;
-                        http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
-                        //请求内容
-                        //http.Data("code", "9405");
-                        //添加请求头
-                        http.AddHeadersByDic(_reqHeaderDic);
-                        //设置cookie
-                        http.SetCookieHeader(cookie);
-                        //请求
-                        if (_reqMethod == ReqMethod.POST)
-                        {
-                            http.PostForStringAsyc(body); //请求内容放在这里也可
-                        }
-                        else
-                        {
-                            http.GetForStringAsyc();
-                        }
-                        http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
+                    allCount++;
+                    var url         = _dataInfoList[i].ck_url;  
+                    var body        = _dataInfoList[i].ck_body;    
+                    var cookie      = _dataInfoList[i].ck_cookie;
+
+                    var urlAppend   = string.Empty;
+                    var bodyAppend  = this._reqBodyStr;
+
+                    if(!string.IsNullOrEmpty(this._reqUrlAddStr)){
+                        urlAppend = "&" + this._reqUrlAddStr;
                     }
+                    if (!url.Contains(urlAppend)){
+                        url = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(url + urlAppend, string.Empty));
+                    }
+
+                    if (!string.IsNullOrEmpty(bodyAppend)){
+                        body = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(bodyAppend, string.Empty));
+                    }
+
+                    EasyHttp http = EasyHttp.With(url);
+                    if (http == null) {
+                        _bgMeet.ReportProgress(allCount, EasyHttpUtils.UnicodeDencode("url出错!"));
+                        return;
+                    }
+                    http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
+                    //http.Data("code", "9405");//请求内容
+                    http.AddHeadersByDic(_reqHeaderDic);//添加请求头
+                    http.SetCookieHeader(cookie);//设置cookie
+                    if (_reqMethod == ReqMethod.POST)
+                    {
+                        //http.PostForStringAsyc(body);
+                        var resStr = http.PostForString(body);
+                        _bgMeet.ReportProgress(allCount, EasyHttpUtils.UnicodeDencode(resStr));
+                    }
+                    else
+                    {
+                        //http.GetForStringAsyc();
+                        var resStr = http.GetForString();
+                        _bgMeet.ReportProgress(allCount, EasyHttpUtils.UnicodeDencode(resStr));
+                    }
+                    //http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);   
                 }
             }
-            ));
         }
+        private void bgMeetDo_handReq(object sender, DoWorkEventArgs e)
+        {
+            if(!e.Argument.Equals(_handReqStr)){
+                Console.WriteLine("is busy------------->bgMeetDo_handReq");
+                return;
+            }
+            _doThingStr     = _handReqStr;
+            string tmpck    = _cookieHeader;
+            string ckstr    = _reqCookieStr;
+            string urlstr   = _reqUrlSourceStr;
+            string body     = _reqBodyStr;
+            var urlAppend   = string.Empty;
 
+            if (string.IsNullOrEmpty(urlstr) || !EasyHttpUtils.CheckIsUrlFormat(urlstr))
+            {
+                _bgMeet.ReportProgress(0, EasyHttpUtils.UnicodeDencode("url格式不正确:" + urlstr));
+                return;
+            }
+            if (!string.IsNullOrEmpty(this._reqUrlAddStr))
+            {
+                urlAppend = "&" + this._reqUrlAddStr;
+            }
+            if (!urlstr.Contains(urlAppend))
+            {
+                urlstr = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(urlstr + urlAppend, string.Empty));
+            }
+
+            if (!string.IsNullOrEmpty(ckstr)){
+                tmpck = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(ckstr, string.Empty));
+            }
+
+            if (!string.IsNullOrEmpty(body)){
+                body = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(body, string.Empty));
+            }
+
+            int recount = getReqCount();
+            for (int i = 0; i < recount; ++i)
+            {
+                EasyHttp http = EasyHttp.With(urlstr);
+                if (http == null) {
+                    _bgMeet.ReportProgress(i, EasyHttpUtils.UnicodeDencode("url格式不正确: " + urlstr));
+                    return;
+                }
+                http.LogLevel(EasyHttp.EasyHttpLogLevel.Header);
+                //http.Data("code", "9405");
+                http.AddHeadersByDic(_reqHeaderDic);
+                http.SetCookieHeader(tmpck);
+                if (_reqMethod == ReqMethod.POST)
+                {
+                    //http.PostForStringAsyc(tmpbody);
+                    var resStr = http.PostForString(body);
+                    _bgMeet.ReportProgress(i, EasyHttpUtils.UnicodeDencode(resStr));
+                }
+                else
+                {
+                    //http.GetForStringAsyc();
+                    var resStr = http.GetForString();
+                    _bgMeet.ReportProgress(i, EasyHttpUtils.UnicodeDencode(resStr));
+                }
+                //http.OnDataReturn += new EasyHttp.DataReturnHandler(addDataReturn);
+            }
+        }
         //请求结果显示到UI
         private void addDataReturn(object sender,DataReturn data)
         {
@@ -261,7 +325,7 @@ namespace CC_GRASPTOOL
             }
             ui_rtext_return.AppendText(tmpStr + "\r\n");
             ui_rtext_return.ScrollToEnd();
-            UIHelper.DoEvents();
+            //UIHelper.DoEvents();
         }
         //读取配置，写如UI
         private void addTxtReturn(object sender, DataInfo data)
@@ -269,23 +333,21 @@ namespace CC_GRASPTOOL
             _dataInfoList.Add(new DataInfo(data.ck_id, data.ck_cookie, data.ck_body, data.ck_url));
             ui_listview_ck.Items.MoveCurrentToLast();
             ui_listview_ck.ScrollIntoView(ui_listview_ck.Items.CurrentItem);
-            UIHelper.DoEvents();
+            //UIHelper.DoEvents();
         }
         //控制请求次数
         private int getReqCount()
         {
             int reqcount = 1;
             int nstr = 0;
-            string cstr = ui_text_numinput.Text;
+            string cstr = this._reqNumStr;
             if(string.IsNullOrEmpty(cstr)){
                 return reqcount;            
             }
-            try
-            {
+            try{
                 nstr = int.Parse(cstr);
             }
-            catch (Exception e)
-            {
+            catch (Exception e){
                 Console.WriteLine("error:" + e.Message);
                 return reqcount;
             }
@@ -296,7 +358,6 @@ namespace CC_GRASPTOOL
                 reqcount = 100;      //最多请求100次
             return reqcount;
         }
-
         public void onUireqtypeSelChenged(object sender, SelectionChangedEventArgs e)
         {
             string selectedContent = ((ComboBoxItem)ui_req_type.SelectedItem).Content.ToString();
@@ -310,6 +371,33 @@ namespace CC_GRASPTOOL
                 Console.WriteLine("GET");
                 _reqMethod = ReqMethod.GET;
             }
+        }
+        public void onText_reqNum_changed(object sender, TextChangedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            this._reqNumStr = text;
+        }
+        private void onText_reqBody_changed(object sender, TextChangedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            this._reqBodyStr = text;
+        }
+        private void onText_reqUrlAdd_changed(object sender, TextChangedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            this._reqUrlAddStr = text;
+        }
+
+        private void onText_reqUrlSource_changed(object sender, TextChangedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            this._reqUrlSourceStr = text;
+        }
+
+        private void onText_reqCookie_changed(object sender, TextChangedEventArgs e)
+        {
+            string text = ((TextBox)sender).Text;
+            this._reqCookieStr = text;
         }
     }
 }

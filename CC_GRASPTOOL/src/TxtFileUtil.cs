@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.ComponentModel;
 
 namespace CC_GRASPTOOL
 {
@@ -13,20 +14,26 @@ namespace CC_GRASPTOOL
     {
         private static string _txtName       = "\\cookies.txt";
         private static string _filePath      = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + _txtName;
-        private 　List<string> _cookieList   = new List<string>();
-        private 　List<string> _urlList      = new List<string>();
-        private   List<string> _bodyList     = new List<string>();
+        public 　List<string> _cookieList   = new List<string>();
+        public 　List<string> _urlList      = new List<string>();
+        public   List<string> _bodyList     = new List<string>();
         //定义一个delegate委托
         public 　delegate void TxtReturnHandler(object sender , DataInfo data);
         public   event TxtReturnHandler OnTxtReturn;
-        public async void readFileToList()
+
+        public TxtFileUtil()
         {
+        }
+
+        public List<DataInfo> readFileToList()
+        {
+            List<DataInfo> dataInfoList = new List<DataInfo>();
             _cookieList.Clear();
             _urlList.Clear();
             _bodyList.Clear();
             if (string.IsNullOrEmpty(_filePath))
             {
-                return;
+                return dataInfoList;
             }
 
             if (System.IO.File.Exists(_filePath))
@@ -36,12 +43,11 @@ namespace CC_GRASPTOOL
                     FileStream fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read,FileShare.ReadWrite);
                     StreamReader streamReader = new StreamReader(fs,Encoding.UTF8);
                     streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
-                    string filestr = await streamReader.ReadToEndAsync();
+                    string filestr = streamReader.ReadToEnd();
+                    //string filestr = await streamReader.ReadToEndAsync();
                     streamReader.Close();
-                    //Console.WriteLine("读取内容：\r\n" + filestr);
-                    paraseTxtString(filestr);
+                    dataInfoList = paraseTxtString(filestr);
                 }catch(Exception e){
-
                     Console.WriteLine("读取文件出错:" + e.Message);
                 }
             }
@@ -55,17 +61,18 @@ namespace CC_GRASPTOOL
                     Console.WriteLine("创建文件出错:" + e.Message);
                 }
             }
+            return dataInfoList;
         }
 
-        private void paraseTxtString(string txtString)
+        private List<DataInfo> paraseTxtString(string txtString)
         {
+            List<DataInfo> dataInfoList = new List<DataInfo>();
             if(string.IsNullOrEmpty(txtString)){
-                return;
+                return dataInfoList;
             }
 
             var __tmpstr = EasyHttpUtils.RemoveSpace(EasyHttpUtils.ReplaceNewline(txtString, string.Empty));
             //Console.WriteLine("去换行:"+ __tmpstr);
-
             string[] sArray = Regex.Split(__tmpstr, "hcc_cookiePath=", RegexOptions.IgnoreCase);
             int i = 0;
             int j = 0;
@@ -94,45 +101,25 @@ namespace CC_GRASPTOOL
                             }else if(j%3==1){
                                 _cookieList.Add(str_3);
                             }else if(j%3==2){
-                                var ts = str_3;
-                                if (ts.Length > 250){
-                                    ts = str_3.Substring(0, 200);
-                                }
-                                _urlList.Add(ts);
+                                _urlList.Add(str_3);
                             }
                         }
                     }
                 }
             }
 
-            foreach(string cookies in _cookieList)
-            {
-                //Console.WriteLine("cookies = " + cookies.ToString());
-            }
-
-            foreach (string url in _urlList)
-            {
-                //Console.WriteLine("url = " + url.ToString());
-            }
-
-            foreach (string body in _bodyList)
-            {
-                //Console.WriteLine("body = " + body.ToString());
-            }
-
             for (int ct = 0; ct < _cookieList.Count; ct++ )
             {
-                if (OnTxtReturn != null)
-                {
-                    OnTxtReturn.Invoke(this, new DataInfo(Convert.ToString(ct+1), _cookieList[ct], _bodyList[ct],_urlList[ct]));
+                dataInfoList.Add(new DataInfo(Convert.ToString(ct + 1), _cookieList[ct], _bodyList[ct], _urlList[ct]));
+                if (OnTxtReturn != null){
+                    //OnTxtReturn.Invoke(this, new DataInfo(Convert.ToString(ct+1), _cookieList[ct], _bodyList[ct],_urlList[ct]));
                 }
-                else
-                {
-                    Console.WriteLine("OnTextReturn == null");
+                else{
+                    //Console.WriteLine("OnTextReturn == null");
                 }
-
             }
-        }
+            return dataInfoList;
+     }
 
     }
 }

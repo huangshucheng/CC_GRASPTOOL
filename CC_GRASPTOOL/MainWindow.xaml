@@ -36,6 +36,7 @@
                 Margin="69,552,0,0" 
                 VerticalAlignment="Top" 
                 AcceptsReturn="True"
+                TextChanged ="onText_reqCookie_changed"
                 Text="">
             </TextBox>
             <TextBox x:Name="ui_rtext_urlinput" 
@@ -46,28 +47,32 @@
                  VerticalAlignment="Top" 
                  AcceptsReturn="True"
                  VerticalScrollBarVisibility="Auto"
+                 TextChanged="onText_reqUrlSource_changed"
                  Text="">
             </TextBox>
-            <TextBox Name="ui_text_numinput" 
+            <TextBox 
+                 Name="ui_text_numinput" 
                  HorizontalAlignment="Left" 
                  Height="29" Margin="69,620,0,0" 
                  TextWrapping="Wrap" 
                  VerticalAlignment="Top" 
                  Width="63"
                  AcceptsReturn="True"
+                TextChanged="onText_reqNum_changed"
                  Text="1" />
             <Label Content="url:" HorizontalAlignment="Left" Margin="24,508,0,0" VerticalAlignment="Top"/>
             <Label Content="cookie:" HorizontalAlignment="Left" Margin="10,572,0,0" VerticalAlignment="Top"/>
             <Label Content="请求次数:" HorizontalAlignment="Left" Margin="3,620,0,0" VerticalAlignment="Top"/>
-            <Label Content="请求参数:" HorizontalAlignment="Left" Margin="179,624,0,0" VerticalAlignment="Top"/>
+            <Label Content="请求参数:" HorizontalAlignment="Left" Margin="182,621,0,0" VerticalAlignment="Top"/>
             <Label Content="参数用&amp;连接,例: code=1020&amp;num=1235" HorizontalAlignment="Left" Margin="252,678,0,0" VerticalAlignment="Top"/>
-            <TextBox x:Name="ui_text_paraminput" 
+            <TextBox x:Name="ui_text_bodyinput" 
         	HorizontalAlignment="Left" 
-        	Height="53" Margin="252,620,0,0" 
+        	Height="26" Margin="252,620,0,0" 
         	TextWrapping="Wrap" 
         	VerticalAlignment="Top" 
-        	Width="514"
+        	Width="468"
             AcceptsReturn="True"
+            TextChanged="onText_reqBody_changed"
         	Text="" />
             <ComboBox Name="ui_req_type" 
                       HorizontalAlignment="Left" 
@@ -80,6 +85,16 @@
                 <ComboBoxItem Content="GET"></ComboBoxItem>
             </ComboBox>
             <Label Content="请求方式 :" HorizontalAlignment="Left" Margin="3,657,0,0" VerticalAlignment="Top"/>
+            <Label Content="url追加:" HorizontalAlignment="Left" Margin="187,652,0,0" VerticalAlignment="Top"/>
+            <TextBox x:Name="ui_text_url_append" 
+            	HorizontalAlignment="Left" 
+            	Height="26" Margin="252,651,0,0" 
+            	TextWrapping="Wrap" 
+            	VerticalAlignment="Top" 
+            	Width="468"
+            	AcceptsReturn="True"
+                TextChanged="onText_reqUrlAdd_changed"
+            	Text="" />
         </Grid>
     </Viewbox>
 </Window>

@@ -39,8 +39,8 @@ namespace CC_GRASPTOOL
         private readonly WebHeaderCollection _defaultHeaders = new WebHeaderCollection();   //默认请求头
         private readonly List<KeyValue> _keyValues           = new List<KeyValue>();        //请求参数
 
-        public delegate HttpWebResponse InterceptorDelegate(HttpWebRequest request);
-        public InterceptorDelegate RequestInterceptor;
+        //public delegate HttpWebResponse InterceptorDelegate(HttpWebRequest request);
+        //public InterceptorDelegate RequestInterceptor;
 
         //定义一个delegate委托
         public delegate void DataReturnHandler(object sender, DataReturn data);
@@ -339,16 +339,14 @@ namespace CC_GRASPTOOL
             {
                 if (!WebHeaderCollection.IsRestricted(key))
                 {
-                    Console.WriteLine("请求头： {0} : {1}", key, _headers[key]);
+                    //Console.WriteLine("请求头： {0} : {1}", key, _headers[key]);
                     _request.Headers.Add(key, _headers[key]);
                     if (_request.Headers.Get(key) != null)
                         _request.Headers.Set(key,_headers[key]);
                 }else
                 {
-                    Console.WriteLine("请求头（受限）： {0} : {1}", key, _headers[key]);
-                   // Console.WriteLine("头受限制-> {0}", key);
+                    //Console.WriteLine("请求头（受限）： {0} : {1}", key, _headers[key]);
                     setRestrictedHeader(key);
-                    // do some thing, use HttpWebRequest propertiers to add restricted http header.
                 }
             }
         }
@@ -421,18 +419,11 @@ namespace CC_GRASPTOOL
             {
                 UrlToQuery(_url);
                 url = this._url;
-                Console.WriteLine("url: 1------------>{0}",url);
                 if (_keyValues.Count > 0)
                 {
                     //分解参数
-                    Console.WriteLine("------------>带请求参数，请求网页");
                     url = url + "?" + EasyHttpUtils.NameValuesToQueryParamString(_keyValues);
                 }
-                else
-                {
-                    Console.WriteLine("------------>不带请求参数，请求网页");
-                }
-                Console.WriteLine("url: 2------------>{0}", url);
                 _request = WebRequest.Create(url) as HttpWebRequest;
                 EasyHttpUtils.CopyHttpHeader(_tempRequest,_defaultHeaderRequest, _request);
                 _request.Method = "GET";
@@ -442,7 +433,6 @@ namespace CC_GRASPTOOL
             //post方式需要写入
             else if (method == Method.POST)
             {
-                Console.WriteLine("POST ------------>");
                 url = _url;
                 _request = _tempRequest;
                 _request.CookieContainer = _cookieContainer;
@@ -460,14 +450,8 @@ namespace CC_GRASPTOOL
                         _request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
                     }
                     string querystring = EasyHttpUtils.NameValuesToQueryParamString(_keyValues);
-                    //如果有自定义post内容，则写入自定义post数据，否则写入form
                     if (_customePostData != null) 
                         querystring = _customePostData;
-
-                    if (!string.IsNullOrEmpty(querystring))
-                        Console.WriteLine("\n请求参数: {0}", querystring);
-                    else
-                        Console.WriteLine("\n无请求参数");
                     using (var stream = _request.GetRequestStream())
                     {
                         byte[] postData = _postEncoding.GetBytes(querystring);
@@ -506,19 +490,13 @@ namespace CC_GRASPTOOL
                 _request.Method = "DELETE";
                 WriteHeader();
             }
-            //开始请求
-            if (RequestInterceptor != null){
-                _response = RequestInterceptor.Invoke(_request);
+
+            try{
+                _response = _request.GetResponse() as HttpWebResponse;
             }
-            else
-            {
-                try {
-                    _response = _request.GetResponse() as HttpWebResponse;
-                }
-                catch (WebException ex){
-                    Console.WriteLine("\n请求出错--------->:{0}", ex.Message);
-                    return null; 
-                }
+            catch (WebException ex){
+                Console.WriteLine("\n请求出错--------->:{0}", ex.Message);
+                return null;
             }
 
             if(_response != null){
@@ -543,10 +521,10 @@ namespace CC_GRASPTOOL
             {
                 UrlToQuery(_url);
                 url = this._url;
-                Console.WriteLine("url: 1------------>{0}", url);
+                //Console.WriteLine("url: 1------------>{0}", url);
                 if (_keyValues.Count > 0)
                     url = url + "?" + EasyHttpUtils.NameValuesToQueryParamString(_keyValues);
-                Console.WriteLine("url: 2------------>{0}", url);
+                //Console.WriteLine("url: 2------------>{0}", url);
                 _request = WebRequest.Create(url) as HttpWebRequest;
                 EasyHttpUtils.CopyHttpHeader(_tempRequest, _defaultHeaderRequest, _request);
                 _request.Method = "GET";
@@ -575,11 +553,6 @@ namespace CC_GRASPTOOL
                     //如果有自定义post内容，则写入自定义post数据，否则写入form（form优先）
                     if (!string.IsNullOrEmpty(_customePostData))
                         querystring = _customePostData;
-
-                    if (!string.IsNullOrEmpty(querystring))
-                        Console.WriteLine("\n请求参数: {0}", querystring);
-                    else
-                        Console.WriteLine("\n无请求参数");
                     //处理请求参数
                     using (var stream = _request.GetRequestStream())
                     {
@@ -594,10 +567,10 @@ namespace CC_GRASPTOOL
         //用_request 提交异步请求
         private async void submitRequestAsyc(HttpWebRequest request)
         {
-            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
-            bool exception = false;
+            if (_request == null){
+                return;
+            }
             HttpStatusCode statusCode = HttpStatusCode.NotFound;
-            timer.Start();
             try {
                 _response = (await request.GetResponseAsync()) as HttpWebResponse;
                 Stream responseStream = _response.GetResponseStream();
@@ -611,10 +584,9 @@ namespace CC_GRASPTOOL
                 _cookieContainer.Add(_response.Cookies);
                 _response.Close();
                 LogHtml(str);
-
                 if (OnDataReturn != null)
                 {
-                    OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));
+                    OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));    //TODO
                 }
             }
             catch (WebException ex)
@@ -627,15 +599,10 @@ namespace CC_GRASPTOOL
                     LogHtml(str);
                     if (OnDataReturn != null)
                     {
-                        OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));
+                        OnDataReturn.Invoke(this, new DataReturn("0", EasyHttpUtils.UnicodeDencode(str)));    //TODO
                     }
                 }
-                else
-                {
-                    exception = true;
-                }
             }
-            timer.Stop();
 
             if (_logLevel != EasyHttpLogLevel.None)
             {
@@ -647,25 +614,6 @@ namespace CC_GRASPTOOL
                 catch (Exception e)
                 {
                     Console.WriteLine("\nsubmitRequestAsyc error:" + e.Message);
-                }
-            }
-            Console.WriteLine("\n请求结果:");
-            if (exception)
-            {
-                var resStr = String.Format("请求异常,  耗时：{0} ms", timer.ElapsedMilliseconds);
-                Console.WriteLine(resStr);
-                if (OnDataReturn != null)
-                {
-                    //OnDataReturn.Invoke(this, new DataReturn("0", resStr));
-                }
-            }else{
-                long size = _response.ContentLength;
-                var resStr =　String.Format("请求结果: statuesCode:{0} , {1},  耗时：{2} ms, 返回结果大小：{3}", (int)statusCode, statusCode.ToString(), timer.ElapsedMilliseconds, size);
-                Console.WriteLine(resStr);
-                Console.WriteLine("\n");
-                if (OnDataReturn != null)
-                {
-                    //OnDataReturn.Invoke(this, new DataReturn("0", resStr));
                 }
             }
         }
