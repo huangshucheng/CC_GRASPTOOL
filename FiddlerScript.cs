@@ -89,10 +89,11 @@ class Handlers
 	//static var _filePath: String = "C:\\Users\\KQ-130\\Desktop\\cookies.txt";
 	//host过滤,为空则保存所有cookie,(不带http://) 用户修改
 	//static var _hostCompare      = "www.baidu.com";
-	 static var _hostCompare      = "wx.vivatech.cn";
+	//static var _hostCompare      = "wx.vivatech.cn";
 	//static var _hostCompare      = "www.usazmzs.com";
-	//static var _hostCompare      = "";
+	//static var _hostCompare      = "www.i-orange-xf.com";
 	//static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
+	static var _hostCompare    = "";
 		
 	static var _static_ck 		= "hcc_cookiePath= ";     //固定值,解析cookie
 	static var _static_url 		= "hcc_fullUrlPath= ";    //固定值,解析Url
@@ -188,6 +189,14 @@ class Handlers
 		//var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite,FileShare.ReadWrite);
 		//var sw = new StreamWriter(fs)
 		//MessageBox.Show("hccc");
+		if(url.Contains(".png")||
+			url.Contains(".mp3")||
+			url.Contains(".jpg")||
+			url.Contains(".css")||
+			url.Contains(".js")){
+			return;
+		}
+		
 		try{
 			_lockSlim.EnterWriteLock();
 			var sw = new StreamWriter(filePath,true)
@@ -468,8 +477,8 @@ class Handlers
 					var __bdy 	= _static_body_res + reqBody + "";
 					if(_lockSlim.IsReadLockHeld()){_lockSlim.ExitReadLock();}
 					if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)){
-					if(_isWriteResponse){WriteToFile(filePath,__cks,__url,__bdy);}
-					FiddlerObject.log("\r\nhcc----------->不存在cookie，写入: " + cookie);
+						if(_isWriteResponse){WriteToFile(filePath,__cks,__url,__bdy);}
+						FiddlerObject.log("\r\nhcc----------->不存在cookie，写入: " + cookie);
 					}else{
 						FiddlerObject.log("\r\nhcc----------->存在cookie:，不写入: " + cookie);
 					}
@@ -688,5 +697,7 @@ class Handlers
 		}
 	}
 }
+
+
 
 
