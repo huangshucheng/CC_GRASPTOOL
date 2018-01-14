@@ -89,11 +89,11 @@ class Handlers
 	//static var _filePath: String = "C:\\Users\\KQ-130\\Desktop\\cookies.txt";
 	//host过滤,为空则保存所有cookie,(不带http://) 用户修改
 	//static var _hostCompare      = "www.baidu.com";
-	static var _hostCompare      = "wx.vivatech.cn";
+	//static var _hostCompare      = "wx.vivatech.cn";
 	//static var _hostCompare      = "www.usazmzs.com";
 	//static var _hostCompare      = "www.i-orange-xf.com";
 	//static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
-	//static var _hostCompare    = "";
+	static var _hostCompare    = "wshop.wetcent.com";
 		
 	static var _static_ck 		= "hcc_cookiePath= ";     //固定值,解析cookie
 	static var _static_url 		= "hcc_fullUrlPath= ";    //固定值,解析Url
@@ -698,6 +698,8 @@ class Handlers
 		}
 	}
 }
+
+
 
 
 
