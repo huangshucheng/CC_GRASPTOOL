@@ -92,8 +92,8 @@ class Handlers
 	//static var _hostCompare      = "wx.vivatech.cn";
 	//static var _hostCompare      = "www.usazmzs.com";
 	//static var _hostCompare      = "www.i-orange-xf.com";
-	//static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
-	static var _hostCompare    = "wshop.wetcent.com";
+	static var _hostCompare    = "weixin.jibei.sgcc.com.cn";
+	//static var _hostCompare    = "";
 		
 	static var _static_ck 		= "hcc_cookiePath= ";     //固定值,解析cookie
 	static var _static_url 		= "hcc_fullUrlPath= ";    //固定值,解析Url
@@ -193,7 +193,7 @@ class Handlers
 			url.Contains(".mp3")||
 			url.Contains(".jpg")||
 			url.Contains(".css")||
-			url.Contains(".js")){
+		url.Contains(".js")){
 			return;
 		}
 		
@@ -235,6 +235,14 @@ class Handlers
 		var filePath    = _filePath;
 		var hostcompare = _hostCompare
 		
+		if(oSession.uriContains(".")){
+			//设置上方为域名
+			//下方为伪装IP
+			var ip="117.136.4.1";
+			oSession.oRequest.headers.Add("Cient_ip", ip);
+			oSession.oRequest.headers.Add("X-forwarded-for", ip);
+		}
+		
 		//oSession.SaveSession(filePath,true);
 		FiddlerObject.log("hcc------->url:  " + urlstr);
 		
@@ -257,7 +265,7 @@ class Handlers
 					var __url = _static_url + fullurl + "";
 					var __bdy = _static_body_req + reqBody + "";
 					if(_lockSlim.IsReadLockHeld()){_lockSlim.ExitReadLock();}
-					if(!alltext.Contains(cookie)||!alltext.Contains(fullurl)){
+					if(!alltext.Contains(cookie)||!alltext.Contains(fullurl)||!alltext.Contains(reqBody)){
 						if(_isWriteRequest){WriteToFile(filePath,__cks,__url,__bdy);}
 						FiddlerObject.log("\r\nhcc----------->不存在cookie，写入: " + cookie);
 					}else{
@@ -286,7 +294,7 @@ class Handlers
 					var __url = _static_url + fullurl + "";
 					var __bdy = _static_body_req + reqBody + "";
 					if(_lockSlim.IsReadLockHeld()){_lockSlim.ExitReadLock();}
-					if(!alltext.Contains(cookie)||!alltext.Contains(fullurl)){
+					if(!alltext.Contains(cookie)||!alltext.Contains(fullurl)||!alltext.Contains(reqBody)){
 						if(_isWriteRequest){WriteToFile(filePath,__cks,__url,__bdy);}
 						FiddlerObject.log("\r\nhcc----------->不存在cookie，写入: " + cookie);
 					}else{
@@ -422,7 +430,7 @@ class Handlers
 		var hostName    = oSession.hostname;
 		var urlstr      = oSession.url;
 		var fullurl     = oSession.fullUrl;
-		var reqBody		= oSession.GetResponseBodyAsString();
+		var resBody		= oSession.GetResponseBodyAsString();
 		
 		var hostcompare = _hostCompare
 		var filePath    = _filePath;
@@ -444,9 +452,9 @@ class Handlers
 					var alltext = File.ReadAllText(filePath);
 					var __cks 	= _static_ck + cookie + "";
 					var __url 	= _static_url + fullurl + "";
-					var __bdy 	= _static_body_res + reqBody + "";
+					var __bdy 	= _static_body_res + resBody + "";
 					if(_lockSlim.IsReadLockHeld()){_lockSlim.ExitReadLock();}
-					if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)){
+					if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)||!alltext.Contains(resBody)){
 						if(_isWriteResponse){WriteToFile(filePath,__cks,__url,__bdy);}
 						FiddlerObject.log("\r\nhcc----------->不存在cookie，写入: " + cookie);
 					}else{
@@ -475,9 +483,9 @@ class Handlers
 					var alltext = File.ReadAllText(filePath);
 					var __cks 	= _static_ck + cookie + "";
 					var __url 	= _static_url + fullurl + "";
-					var __bdy 	= _static_body_res + reqBody + "";
+					var __bdy 	= _static_body_res + resBody + "";
 					if(_lockSlim.IsReadLockHeld()){_lockSlim.ExitReadLock();}
-					if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)){
+					if(!alltext.Contains(cookie) ||!alltext.Contains(fullurl)||!alltext.Contains(resBody)){
 						if(_isWriteResponse){WriteToFile(filePath,__cks,__url,__bdy);}
 						FiddlerObject.log("\r\nhcc----------->不存在cookie，写入: " + cookie);
 					}else{
