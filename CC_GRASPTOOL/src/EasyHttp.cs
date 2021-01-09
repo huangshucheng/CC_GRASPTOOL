@@ -383,6 +383,7 @@ namespace CC_GRASPTOOL
             else if (headerKey.Equals("Connection"))
             {
                 //_request.Connection = _headers[headerKey];        //TODO 
+                _request.KeepAlive = true;
             }
             else if (headerKey.Equals("Referer"))
             {

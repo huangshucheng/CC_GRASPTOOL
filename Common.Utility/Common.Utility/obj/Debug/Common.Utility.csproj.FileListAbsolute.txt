@@ -1,7 +1,0 @@
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\bin\Debug\Common.Utility.dll
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\bin\Debug\Common.Utility.pdb
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\bin\Debug\Gma.QrCodeNet.Encoding.dll
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\bin\Debug\ThoughtWorks.QRCode.dll
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\obj\Debug\Common.Utility.csprojResolveAssemblyReference.cache
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\obj\Debug\Common.Utility.dll
-C:\Users\95\Desktop\FD\Common.Utility\Common.Utility\obj\Debug\Common.Utility.pdb

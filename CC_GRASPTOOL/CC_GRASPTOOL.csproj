@@ -74,6 +74,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Receiver.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Receiver.Designer.cs">
+      <DependentUpon>Receiver.cs</DependentUpon>
+    </Compile>
     <Compile Include="src\DataInfo.cs" />
     <Compile Include="src\KeyValue.cs" />
     <Compile Include="src\DataReturn.cs" />
@@ -108,6 +114,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="Receiver.resx">
+      <DependentUpon>Receiver.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

@@ -8,7 +8,7 @@
             <Button Content="手动请求" HorizontalAlignment="Left" Margin="210,774,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_HandReq" Height="42" Cursor="Hand"/>
             <Button Content="开始读配置" HorizontalAlignment="Left" Margin="461,777,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ReadConf" Height="42" Cursor="Hand"/>
             <Button Content="用配置请求" HorizontalAlignment="Left" Margin="601,778,0,0" VerticalAlignment="Top" Width="112" Click="Button_Click_ConfigReq" Height="42" Cursor="Hand" IsDefault="True"/>
-            <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="249" VerticalAlignment="Top" AllowDrop="True" Width="840" Margin="-1,1,0,0" >
+            <ListView Name="ui_listview_ck" HorizontalAlignment="Left" Height="249" VerticalAlignment="Top" AllowDrop="True" Width="840" Margin="-1,1,0,0" SelectionChanged="ui_listview_ck_SelectionChanged" >
                 <ListView.View>
                     <GridView >
                         <GridViewColumn Header="序号" Width="50" DisplayMemberBinding ="{Binding ck_id}"/>
@@ -97,6 +97,7 @@
             	AcceptsReturn="True"
                 TextChanged="onText_reqUrlAdd_changed"
             	Text="" />
+            <ListBox HorizontalAlignment="Left" Height="199" Margin="-141,351,0,0" VerticalAlignment="Top" Width="113"/>
         </Grid>
     </Viewbox>
 </Window>

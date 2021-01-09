@@ -50,6 +50,7 @@ namespace CC_GRASPTOOL
         string _web5 = "http://api.androidhive.info/volley/person_object.json";  //for test json response
         string _web6 = "http://eservice.datcent.com/psbchn/active?code=0219l3u72fgwfL0tvHt72Ei6u729l3uP&state=123";
 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -73,7 +74,11 @@ namespace CC_GRASPTOOL
             //_dataInfoList.Add(new DataInfo("2", "cookies2--hjfkjdk", "result2", "state2"));
             //_dataReturnList.Add(new DataReturn("1", "return"));
             ui_listview_ck.ItemsSource  = _dataInfoList;
+
+            var myForm = new Receiver();
+            myForm.Show();
         }
+
 
         private void InitBackGroundWorker()
         {
@@ -93,6 +98,10 @@ namespace CC_GRASPTOOL
             _dataReturnList.Clear();
             ui_rtext_return.Text = string.Empty;
             _responseIndex = 0;
+
+            ////test
+            var myForm = new Receiver();
+            myForm.Show();
         }
         //手动请求
         private void Button_Click_HandReq(object sender, RoutedEventArgs e)
@@ -389,6 +398,11 @@ namespace CC_GRASPTOOL
         {
             string text = ((TextBox)sender).Text;
             this._reqCookieStr = text;
+        }
+
+        private void ui_listview_ck_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }
